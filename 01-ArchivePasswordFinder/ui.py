@@ -217,9 +217,9 @@ TEXTS = {
         "title": "压缩包密码找回",
     },
     "en": {
-        "app_name": "Archive Password Finder",
+        "app_name": "ArchivePasswordFinder",
         "by": "by cbd",
-        "h1": "Archive Password Finder",
+        "h1": "ArchivePasswordFinder",
         "archive": "Archive",
         "archive_ph": "Choose a .zip / .rar / .7z archive…",
         "browse": "Browse…",
@@ -268,7 +268,7 @@ TEXTS = {
         "log_extracted": "Extraction finished.",
         "badge_none": "Waiting",
         "badge_engine": "Engine · %s",
-        "title": "Archive Password Finder",
+        "title": "ArchivePasswordFinder",
     },
 }
 
@@ -548,7 +548,8 @@ class CapabilityDialog(QDialog):
                     self._bg = pm
                     break
         self.setModal(False)
-        self.setMinimumWidth(660)
+        self.setMinimumWidth(720)
+        self.setMinimumHeight(330)
         self.setStyleSheet(DIALOG_QSS)
         self.setWindowTitle(_tr(lang, "本机破解能力", "Cracking capability"))
         v = QVBoxLayout(self)
@@ -632,6 +633,7 @@ class CapabilityDialog(QDialog):
         bottom.addWidget(self.btn_ok)
         v.addLayout(bottom)
         self._refresh()
+        self.resize(max(720, self.sizeHint().width()), self.sizeHint().height())
 
     def paintEvent(self, e):
         p = QPainter(self)
@@ -1246,13 +1248,22 @@ class MainWindow(QWidget):
             self.update()
 
     def close_clicked(self):
-        if self._running and self._stop is not None:
-            self._stop.set()
         self.close()
 
     def closeEvent(self, e):
+        if self._running:
+            ans = QMessageBox.question(
+                self, self._t("app_name"), self._t("confirm_close"),
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if ans != QMessageBox.Yes:
+                e.ignore()
+                return
         if self._stop is not None:
             self._stop.set()
+        core.kill_child_processes()
+        if self._thread is not None and self._thread.is_alive():
+            self._thread.join(timeout=3)
+        core.kill_child_processes()
         self._timer.stop()
         self._hw.stop()
         e.accept()
@@ -1514,6 +1525,9 @@ class MainWindow(QWidget):
             self.setWindowTitle(core.APP_NAME_EN)
         else:
             self.setWindowTitle(core.APP_NAME_ZH)
+        title = "%s · %s" % (core.APP_NAME_ZH, core.APP_NAME_EN)
+        self.setWindowTitle(title)
+        self.title_bar.lbl_name.setText(title)
         self._refresh_badge()
         self._refresh_status()
         self._refresh_stage()
@@ -2019,10 +2033,16 @@ class MainWindow(QWidget):
 
     # ---------- 拖拽 ----------
     def dragEnterEvent(self, e):
+        if self._running:
+            e.ignore()
+            return
         if e.mimeData().hasUrls():
             e.acceptProposedAction()
 
     def dropEvent(self, e):
+        if self._running:
+            e.ignore()
+            return
         for url in e.mimeData().urls():
             p = url.toLocalFile()
             if p and os.path.isfile(p):
@@ -2164,7 +2184,7 @@ def main(argv=None):
         os.environ["QT_SCALE_FACTOR"] = "%.3f" % scale
 
     app = QApplication([argv[0]])
-    app.setApplicationName(core.APP_NAME_ZH)
+    app.setApplicationName("%s · %s" % (core.APP_NAME_ZH, core.APP_NAME_EN))
     app.setWindowIcon(QIcon(os.path.join(core.ASSETS_DIR, "icon.ico")))
     app.setFont(QFont("Microsoft YaHei UI", 10))
     app.setStyleSheet(QSS.replace("%CHEVRON%",

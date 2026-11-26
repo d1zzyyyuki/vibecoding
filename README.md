@@ -6,7 +6,7 @@
 
 | 序号 | 项目 | 说明 |
 |---|---|---|
-| 01 | [压缩包密码找回（Archive Password Finder）](01-ArchivePasswordFinder/README.md) | Windows 压缩包密码找回工具，支持 ZIP / RAR5 / 7z / AES-ZIP，CUDA / OpenCL / hashcat GPU 加速 · [下载 v1.0.0](https://github.com/d1zzyyyuki/vibecoding/releases/tag/v1.0.0) |
+| 01 | [压缩包密码找回（ArchivePasswordFinder）](01-ArchivePasswordFinder/README.md) | Windows 压缩包密码找回工具，支持 ZIP / RAR5 / 7z / AES-ZIP，CUDA / OpenCL / hashcat GPU 加速 · [下载 v1.0.1](https://github.com/d1zzyyyuki/vibecoding/releases/tag/v1.0.1) |
 
 ## 许可证
 

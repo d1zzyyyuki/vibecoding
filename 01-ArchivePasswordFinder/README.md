@@ -2,7 +2,9 @@
 
 Windows 下的小工具，用来找回自己压缩包的密码。双击 exe 就能用，不需要装 Python、7-Zip 或运行库。
 
-当前版本 v1.0.0。支持 ZIP（ZipCrypto）、RAR / RAR5、7Z、AES-ZIP，以及 7-Zip 能打开的其他格式。
+当前版本 v1.0.1。支持 ZIP（ZipCrypto）、RAR / RAR5、7Z、AES-ZIP，以及 7-Zip 能打开的其他格式。
+
+更新记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 ![界面](docs/screenshot.png)
 
@@ -34,7 +36,7 @@ Windows 下的小工具，用来找回自己压缩包的密码。双击 exe 就�
 
 ## 直接使用
 
-到 [Releases](https://github.com/d1zzyyyuki/vibecoding/releases) 下载 `ArchivePasswordFinder-v1.0.0.exe`，双击运行即可。
+到 [Releases](https://github.com/d1zzyyyuki/vibecoding/releases) 下载 `ArchivePasswordFinder-v1.0.1.exe`，双击运行即可。
 
 ## 从源码运行
 
@@ -70,8 +72,8 @@ CUDA 后端通过 `nvcuda.dll`（NVIDIA 显卡驱动自带）加载 PTX，运行
 在自己的机器上确认实际用的是哪个后端：
 
 ```bat
-压缩包密码找回.exe --selftest --out selftest.json
-压缩包密码找回.exe --capability --out capability.json   :: 24 小时能力评估（含 hashcat 测速，约 10 秒）
+ArchivePasswordFinder.exe --selftest --out selftest.json
+ArchivePasswordFinder.exe --capability --out capability.json   :: 24 小时能力评估（含 hashcat 测速，约 10 秒）
 ```
 
 `backend` 是 `cuda` / `opencl` / `cpu`，`rate` 是实测候选/秒，`detail` 里会写用了哪份 PTX。
@@ -103,7 +105,9 @@ PTX 选型、内核索引映射、自检等用例不需要显卡。
 ## 致谢与声明
 
 - 7-Zip 二进制来自官方发布，遵循 GNU LGPL（`assets/7z-License.txt`）。
-- 界面右侧立绘来自《原神》5.3 海灯节官方前瞻壁纸，仅作个人本地背景使用，请勿二次分发。
+- hashcat 8.0.0 遵循 MIT（`assets/hashcat/LICENSE.hashcat.txt`），PySide6 / Qt6 遵循 LGPLv3（`assets/LGPL-3.0.txt`）。
+- 界面右侧立绘由项目作者提供并授权随本软件使用，版权归原权利方所有。
+- 完整第三方说明见 `assets/THIRD_PARTY_NOTICES.txt`。
 - 本工具仅用于找回自己拥有或已获授权的压缩包密码。
 
 ## License

@@ -17,8 +17,8 @@ except Exception:  # pragma: no cover
 
 APP_NAME = "压缩包密码找回"
 APP_NAME_ZH = "压缩包密码找回"
-APP_NAME_EN = "Archive Password Finder"
-VERSION = "1.0.0"
+APP_NAME_EN = "ArchivePasswordFinder"
+VERSION = "1.0.1"
 
 IS_FROZEN = bool(getattr(sys, "frozen", False))
 IS_WINDOWS = os.name == "nt"
@@ -51,6 +51,31 @@ def default_workers():
     except Exception:
         cpu = 4
     return max(1, min(32, cpu))
+
+
+def kill_child_processes():
+    """关窗时清掉仍在跑的 7z / hashcat，避免线程被它们拖住。"""
+    try:
+        import psutil
+        me = psutil.Process()
+    except Exception:
+        return
+    victims = []
+    for ch in me.children(recursive=True):
+        try:
+            if ch.name().lower() in ("7z.exe", "7zg.exe", "hashcat.exe"):
+                victims.append(ch)
+        except Exception:
+            pass
+    for ch in victims:
+        try:
+            ch.kill()
+        except Exception:
+            pass
+    try:
+        psutil.wait_procs(victims, timeout=2)
+    except Exception:
+        pass
 
 
 def fmt_num(n):
@@ -186,12 +211,16 @@ class Space:
         self.max_len = max_len
         self.prefix = prefix or ""
         self.suffix = suffix or ""
+        if len(self.prefix) + max_len + len(self.suffix) > 64:
+            raise ValueError("密码长度超过 64 个字符（引擎上限）")
         self.buckets = []
         off = 0
         for L in range(min_len, max_len + 1):
             cnt = self.base ** L
             self.buckets.append((L, off, cnt))
             off += cnt
+            if off > (1 << 63) - 1:
+                raise ValueError("候选空间太大，请缩短长度或字符集")
         self.total = off
 
     def decode(self, idx):
@@ -335,10 +364,18 @@ def verify_zip_with_zipfile(path, pw_bytes):
     try:
         with zipfile.ZipFile(path) as zf:
             infos = [i for i in zf.infolist() if (i.flag_bits & 0x1) and not i.is_dir()]
-            with zf.open(infos[0], pwd=pw_bytes) as fh:
-                while fh.read(1 << 16):
-                    pass
-        return True
+            # 不能只看第一个文件：它可能是 Deflate64 等 Python 不支持的压缩方式
+            for zi in infos:
+                if zi.compress_type not in (0, 8):
+                    continue
+                try:
+                    with zf.open(zi, pwd=pw_bytes) as fh:
+                        while fh.read(1 << 16):
+                            pass
+                    return True
+                except Exception:
+                    continue
+        return False
     except Exception:
         return False
 
@@ -501,21 +538,37 @@ class SevenZip:
             return -1, str(e).encode("utf-8", "replace")
 
     def test(self, archive, password, target=None, timeout=120):
+        ok, _err = self.test_checked(archive, password, target, timeout)
+        return ok
+
+    def test_checked(self, archive, password, target=None, timeout=120):
+        """返回 (success, error)。error=None 表示密码不对，不是环境问题。"""
         if not self.exe:
-            return False
+            return False, "找不到 7z.exe"
         args = ["t", "-y", "-bsp0", "-bse0", "-p" + password, "--", archive]
         if target:
             args.append(target)
         try:
             r = self._run(args, timeout)
-        except Exception:
-            return False
-        if r.returncode != 0:
-            return False
-        out = r.stdout or b""
-        if b"No files to process" in out:
-            return False
-        return b"Everything is Ok" in out
+        except subprocess.TimeoutExpired:
+            return False, "7-Zip 校验超时（%d 秒）" % timeout
+        except Exception as e:
+            return False, "7-Zip 调用失败：%s" % e
+        out = (r.stdout or b"").decode("utf-8", "replace")
+        if r.returncode == 0 and "Everything is Ok" in out:
+            return True, None
+        low = out.lower()
+        # 先分清“环境坏了”和“密码不对”：7z 对错误密码通常只报 Sub items Errors
+        if ("error:" in low or "can not open" in low or "cannot open" in low
+                or "no more files" in low):
+            tail = " ".join(out.strip().splitlines()[-2:])[:200]
+            return False, "7-Zip 返回码 %d：%s" % (r.returncode, tail or "无输出")
+        if ("wrong password" in low or "data error in encrypted file" in low
+                or "crc failed" in low or "no files to process" in low
+                or "sub items errors" in low or "archives with errors" in low):
+            return False, None
+        tail = " ".join(out.strip().splitlines()[-2:])[:200]
+        return False, "7-Zip 返回码 %d：%s" % (r.returncode, tail or "无输出")
 
     def probe(self, archive, password):
         try:
@@ -1388,6 +1441,7 @@ def _run_7z(seven, space, words, archive, total, workers, emitter, stop, target,
     attempts = 0
     found = None
     pending = {}
+    error = None
     ex = ThreadPoolExecutor(max_workers=max(1, workers))
     exhausted = False
     try:
@@ -1398,7 +1452,7 @@ def _run_7z(seven, space, words, archive, total, workers, emitter, stop, target,
                 except StopIteration:
                     exhausted = True
                     break
-                pending[ex.submit(seven.test, archive, pw, target)] = pw
+                pending[ex.submit(seven.test_checked, archive, pw, target)] = pw
             if not pending:
                 break
             done, _ = wait(list(pending.keys()), timeout=0.2, return_when=FIRST_COMPLETED)
@@ -1406,14 +1460,24 @@ def _run_7z(seven, space, words, archive, total, workers, emitter, stop, target,
                 pw = pending.pop(fut)
                 attempts += 1
                 try:
-                    ok = bool(fut.result())
-                except Exception:
-                    ok = False
-                if ok and (target is None or seven.test(archive, pw, None)):
+                    ok, err = fut.result()
+                except Exception as e:
+                    ok, err = False, "7-Zip 校验异常：%s" % e
+                if err:
+                    error = err
+                    stop.set()
+                    break
+                if ok and target is not None:
+                    ok, err = seven.test_checked(archive, pw, None)
+                    if err:
+                        error = err
+                        stop.set()
+                        break
+                if ok:
                     found = pw
                     stop.set()
                     break
-            if found:
+            if error or found:
                 break
             emitter.progress(attempts)
     finally:
@@ -1421,13 +1485,15 @@ def _run_7z(seven, space, words, archive, total, workers, emitter, stop, target,
             ex.shutdown(wait=False, cancel_futures=True)
         except TypeError:
             ex.shutdown(wait=False)
+    if error:
+        return {"found": False, "password": None, "reason": "error",
+                "message": error, "attempts": attempts,
+                "elapsed": time.time() - emitter.t0}
     if found:
         emitter.progress(attempts, force=True)
         emitter.found(found, attempts)
         return {"found": True, "password": found, "reason": "found",
                 "attempts": attempts, "elapsed": time.time() - emitter.t0}
-    if exhausted:
-        attempts = total
     reason = "stopped" if stop.is_set() else "exhausted"
     return {"found": False, "password": None, "reason": reason,
             "attempts": attempts, "elapsed": time.time() - emitter.t0}
@@ -1437,9 +1503,9 @@ def run_search(opts, emit, stop):
     """执行一次破解任务。opts: archive/mode/charset/minlen/maxlen/wordlist/prefix/suffix/workers/engine。"""
     t0 = time.time()
     archive = os.path.abspath(opts["archive"])
-    kind = detect_kind(archive)
     if not os.path.isfile(archive):
         raise RuntimeError("压缩包不存在：%s" % archive)
+    kind = detect_kind(archive)
     if kind is None:
         raise RuntimeError("无法识别的压缩包格式")
     seven = SevenZip()
@@ -1492,7 +1558,7 @@ def run_search(opts, emit, stop):
             use_gpu = False
             if (prefer in ("auto", "gpu") and gpu is not None and not is_dict
                     and space is not None and gpu.supports(space)
-                    and plan.verify is not None):
+                    and plan.verify is not None and len(plan.targets) >= 2):
                 if prefer == "gpu":
                     use_gpu = True
                 elif len(plan.targets) >= 2:
@@ -1519,7 +1585,7 @@ def run_search(opts, emit, stop):
                     emitter.log("字典模式使用 CPU 原生引擎")
                 elif len(plan.targets) < 2:
                     emitter.log("单文件 ZIP 校验强度不足以支撑 GPU 误报筛选，自动选择 CPU 原生引擎")
-                elif not gpu.supports(space):
+                elif gpu is None or not gpu.supports(space):
                     emitter.log("该候选空间超出 CUDA 内核范围（长度/字符集/前后缀），改用 CPU")
             if can_native:
                 return _run_native_zip(native, plan, archive, space, words_blob, words_offsets,
@@ -1778,8 +1844,9 @@ def _search_rate(kind, plan, prefer, gpu, hashcat_job=None):
         return None
     if kind == "zip" and plan is not None and plan.targets:
         st = _SELFTEST_RESULT or {}
-        if (prefer != "cpu" and gpu is not None and st.get("backend") in ("cuda", "opencl")
-                and st.get("rate")):
+        if (prefer != "cpu" and gpu is not None and len(plan.targets) >= 2
+                and plan.verify is not None
+                and st.get("backend") in ("cuda", "opencl") and st.get("rate")):
             return float(st["rate"])
         return 1.2e8
     return 240.0
@@ -1878,7 +1945,8 @@ def run_auto_search(opts, emit, stop):
                           wordlist=wordlist, rate=rate or 0,
                           unlimited=unlimited)
     gpu_zip = (kind == "zip" and plan is not None and plan.targets
-               and plan.verify and prefer != "cpu" and gpu is not None)
+               and len(plan.targets) >= 2 and plan.verify
+               and prefer != "cpu" and gpu is not None)
     if gpu_zip and attack == "auto":
         if unlimited:
             if any(s.get("type") == "space" and s["maxlen"] > 8 for s in stages):
@@ -1976,6 +2044,8 @@ def run_auto_search(opts, emit, stop):
                               prefer, workers, target, emitter, stop, hashcat_job)
         completed += st
         total_attempts = completed
+        if res.get("reason") == "error":
+            raise RuntimeError(res.get("message") or "7-Zip 校验失败")
         if res.get("found"):
             res["attempts"] = emitter.base + int(res.get("attempts", 0))
             res["elapsed"] = time.time() - t0
@@ -2057,7 +2127,8 @@ def _dispatch_stage(stage, kind, plan, archive, seven, native, gpu,
         except Exception as e:
             emitter.log("GPU（hashcat）阶段失败：%s，改用 7-Zip（CPU）" % e,
                         en="GPU (hashcat) stage failed: %s, falling back to CPU" % e)
-    if is_zip_native and space.max_len > 8 and prefer != "cpu" and gpu is not None:
+    if (is_zip_native and space.max_len > 8 and prefer != "cpu"
+            and gpu is not None and len(plan.targets) >= 2):
         emitter.log("该阶段超过 8 位（GPU 内核上限），改用 CPU 原生引擎",
                     en="Stage exceeds the 8-char GPU kernel limit, using CPU engine")
     if is_zip_native:

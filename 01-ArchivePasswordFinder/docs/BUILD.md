@@ -103,7 +103,7 @@ CUDA 9 之后官方不再支持 sm_20，所以 Fermi 只能用 CUDA 8.0 的 nvcc
 
 ```bat
 venv\Scripts\python -m PyInstaller --noconfirm --clean app.spec
-:: 产物：dist\压缩包密码找回.exe
+:: 产物：dist\ArchivePasswordFinder.exe
 ```
 
 `app.spec` 里裁掉了用不到的 Qt 组件，只保留 Core / Gui / Widgets、qwindows、qico、qjpeg 和样式插件。
@@ -123,5 +123,5 @@ venv\Scripts\python tests\test_cuda.py
 没有界面时也可以直接看能力评估：
 
 ```bat
-压缩包密码找回.exe --capability --out capability.json
+ArchivePasswordFinder.exe --capability --out capability.json
 ```

@@ -37,6 +37,11 @@ def main():
     tmp = tempfile.mkdtemp(prefix="apf_hc_")
     files = {"a.txt": b"A" * 1200, "b.txt": b"B" * 2400, "c.txt": b"C" * 3600}
 
+    rep.check("hashcat $HEX 密码解码带尾空格",
+              hashcat_gpu._decode_candidate("$HEX[7061737320]\r\n") == "pass ")
+    rep.check("hashcat 普通密码保留冒号",
+              hashcat_gpu._decode_candidate("user:pass\n") == "user:pass")
+
     # 1. AES-ZIP
     aes = common.make_archive(os.path.join(tmp, "aes.zip"), files, "739184",
                               zip_crypto=False)

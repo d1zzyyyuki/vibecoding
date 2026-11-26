@@ -57,7 +57,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='压缩包密码找回',
+    name='ArchivePasswordFinder',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

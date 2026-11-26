@@ -19,6 +19,7 @@ FILES = ["main.py", "core.py", "cuda.py", "gpu.py", "hashcat_gpu.py", "capabilit
 TREE = """```
 ArchivePassFinder/
 ├── main.py                  # 入口
+├── CHANGELOG.md             # 版本更新记录
 ├── core.py                  # 候选空间、ZIP 解析、CPU 引擎、GPU 后端选择、启动自检、7-Zip、硬件监控
 ├── cuda.py                  # CUDA 引擎（nvcuda.dll + 预编译 PTX）
 ├── gpu.py                   # OpenCL 引擎
@@ -35,13 +36,15 @@ ArchivePassFinder/
 ├── assets/
 │   ├── 7z.exe / 7z.dll      # 7-Zip 26.06
 │   ├── 7z-License.txt
+│   ├── LGPL-3.0.txt         # PySide6 / Qt 许可
+│   ├── THIRD_PARTY_NOTICES.txt
 │   ├── builtin_words.txt    # 内置字典（303 条）
 │   ├── chevron.png
 │   ├── icon.ico
 │   ├── hutao_bg_soft.jpg    # 窗口背景
 │   ├── hutao_panel.jpg      # 右侧立绘
 │   ├── cuda/                # 25 份预编译 PTX（sm_20 … sm_120，ISA 5.0 / 7.8 / 8.8）
-│   └── hashcat/             # hashcat 8.0.0 运行包 + 7z2hashcat（构建前下载，未进 git）
+│   └── hashcat/             # hashcat 8.0.0 运行包、7z2hashcat 与 MIT 许可全文
 ├── tools/
 │   ├── get_hashcat.py       # 下载 hashcat 运行包
 │   ├── build_cuda_ptx.py    # 构建期生成 PTX
@@ -67,13 +70,13 @@ DOC = r"""# 压缩包密码找回 · 源码与实现说明
 
 > 仅用于找回自己拥有或已获授权的压缩包密码。
 
-当前版本 v1.0.0。
+当前版本 v1.0.1。
 
 ---
 
 ## 0. 交付形态
 
-- 单文件便携 exe：`压缩包密码找回.exe`（Windows 10/11 x64，约 48 MB）
+- 单文件便携 exe：`ArchivePasswordFinder.exe`（Windows 10/11 x64，约 48 MB）
 - 双击即用，不需要装 Python、7-Zip、运行库或 CUDA Toolkit；不联网、不写注册表、不装服务
 - 打开时按实测速度弹出 24 小时能力表，明确写出能试完的密码位数
 - 内置：Python 3.12 运行时、PySide6（Qt6）、7-Zip 26.06、CPU 引擎 DLL、25 份 CUDA PTX、
@@ -147,7 +150,7 @@ venv\Scripts\python ui.py --cli-test 包.zip --out 结果.json
 
 ```bat
 venv\Scripts\python -m PyInstaller --noconfirm --clean app.spec
-:: 产物：dist\压缩包密码找回.exe
+:: 产物：dist\ArchivePasswordFinder.exe
 ```
 
 ---
@@ -341,7 +344,7 @@ UI 在状态栏 CPU 旁边显示 `⚡ CUDA 1.2 G/s` / `⚡ OpenCL 806 M/s` / `�
    （JPG 背景依赖 qjpeg，不能删）
 3. `assets/hashcat/` 里的 hashcat 运行包约 20 MB，exe 约 50 MB
 
-版本资源在 `version_info.txt`，版本 1.0.0。
+版本资源在 `version_info.txt`，版本 1.0.1。
 
 ---
 
@@ -506,8 +509,10 @@ PTX 本身另有 25 份的架构/ISA 检查。
 ## 10. 资产与版权
 
 - 7-Zip 26.06 来自官方发布，遵循 GNU LGPL（`assets/7z-License.txt`）。
+- hashcat 8.0.0 遵循 MIT（`assets/hashcat/LICENSE.hashcat.txt`），PySide6 / Qt6 遵循 LGPLv3（`assets/LGPL-3.0.txt`）。
 - `assets/cuda/*.ptx` 由本仓库的 `zipcuda.cu` 用 NVIDIA NVRTC / CUDA 8.0 生成，运行时由驱动 JIT。
-- 界面立绘来自《原神》5.3 海灯节官方前瞻壁纸，仅作个人本地背景使用，请勿二次分发。
+- 界面立绘由项目作者提供并授权随本软件使用，版权归原权利方所有。
+- 完整第三方说明见 `assets/THIRD_PARTY_NOTICES.txt`。
 - 代码使用 MIT 许可证；第三方组件与图片的版权归各自作者所有。
 """
 

@@ -1,8 +1,8 @@
 # UTF-8
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(1, 0, 0, 0),
-    prodvers=(1, 0, 0, 0),
+    filevers=(1, 0, 1, 0),
+    prodvers=(1, 0, 1, 0),
     mask=0x3f,
     flags=0x0,
     OS=0x40004,
@@ -16,13 +16,13 @@ VSVersionInfo(
         StringTable(
           '080404b0',
           [StringStruct('CompanyName', ''),
-           StringStruct('FileDescription', '压缩包密码找回'),
-           StringStruct('FileVersion', '1.0.0.0'),
-           StringStruct('InternalName', 'ArchivePassRecover'),
-           StringStruct('LegalCopyright', ''),
-           StringStruct('OriginalFilename', '压缩包密码找回.exe'),
-           StringStruct('ProductName', '压缩包密码找回'),
-           StringStruct('ProductVersion', '1.0.0.0')])
+           StringStruct('FileDescription', '压缩包密码找回 · ArchivePasswordFinder'),
+           StringStruct('FileVersion', '1.0.1.0'),
+           StringStruct('InternalName', 'ArchivePasswordFinder'),
+           StringStruct('LegalCopyright', 'MIT License'),
+           StringStruct('OriginalFilename', 'ArchivePasswordFinder.exe'),
+           StringStruct('ProductName', 'ArchivePasswordFinder'),
+           StringStruct('ProductVersion', '1.0.1.0')])
       ]),
     VarFileInfo([VarStruct('Translation', [2052, 1200])])
   ]

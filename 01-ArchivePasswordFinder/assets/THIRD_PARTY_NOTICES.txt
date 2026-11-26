@@ -1,0 +1,27 @@
+ArchivePasswordFinder 第三方组件说明
+====================================
+
+1. hashcat 8.0.0
+   - 许可证：MIT
+   - 项目地址：https://hashcat.net / https://github.com/hashcat/hashcat
+   - 本程序内嵌其官方发布包，运行时解压到 %LOCALAPPDATA%\ArchivePassFinder\hashcat-8.0.0\。
+   - MIT 许可证全文：assets/hashcat/LICENSE.hashcat.txt
+
+2. 7z2hashcat 2.0
+   - 许可证：public domain
+   - 项目地址：https://github.com/philsmd/7z2hashcat
+   - 用于从加密 7z 中提取 hashcat 可识别的哈希。
+
+3. 7-Zip 26.06
+   - 许可证：GNU LGPL
+   - 项目地址：https://www.7-zip.org
+   - 许可证全文：assets/7z-License.txt
+
+4. PySide6 / Qt 6.12
+   - 许可证：GNU LGPLv3
+   - 项目地址：https://www.qt.io / https://pypi.org/project/PySide6/
+   - 本程序使用 PyInstaller 单文件打包，Qt 库随程序一起分发。
+   - LGPLv3 许可证全文：assets/LGPL-3.0.txt
+
+5. 界面立绘
+   - 由项目作者提供并授权随本程序使用，版权归原权利方所有。

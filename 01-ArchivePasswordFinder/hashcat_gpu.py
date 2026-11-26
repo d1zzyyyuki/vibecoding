@@ -496,6 +496,17 @@ def _parse_progress(text):
     return int(m.group(1)), int(m.group(2))
 
 
+def _decode_candidate(raw):
+    """hashcat 偶尔会用 $HEX[...] 包住含特殊字节的密码，按原样解出来。"""
+    s = raw.rstrip("\r\n")
+    if s.startswith("$HEX[") and s.endswith("]"):
+        try:
+            return bytes.fromhex(s[5:-1]).decode("utf-8", "replace")
+        except ValueError:
+            return s
+    return s
+
+
 # ---------------------------------------------------------------------------
 # 执行
 # ---------------------------------------------------------------------------
@@ -528,7 +539,8 @@ class HashcatJob:
             cmd = ([exe, "-m", str(self.mode)] +
                    [a.replace("%HASH%", hash_file) for a in args] +
                    ["--potfile-disable", "--outfile", out_file, "--outfile-format=2",
-                    "--status", "--status-timer=1", "--quiet"] +
+                    "--outfile-autohex-disable", "--status", "--status-timer=1",
+                    "--quiet"] +
                    _BACKEND_FLAGS + device_args())
             if self.mode in (HASHCAT_MODE_7Z, HASHCAT_MODE_RAR5):
                 cmd.append("--keep-guessing")
@@ -565,7 +577,8 @@ class HashcatJob:
                     try:
                         with open(out_file, "r", encoding="utf-8",
                                   errors="replace") as f:
-                            lines = [ln.strip() for ln in f if ln.strip()]
+                            lines = [_decode_candidate(ln) for ln in f
+                                     if ln.rstrip("\r\n")]
                     except OSError:
                         lines = []
                     for pw in lines:
@@ -605,8 +618,11 @@ class HashcatJob:
                 return ("found", verified[0], done_equiv, keyspace)
             if stop_seen[0] or (stop is not None and stop.is_set()):
                 return ("stopped", None, done_equiv, keyspace)
-            if proc.returncode in (0, 1):
+            if proc.returncode == 1:
                 return ("exhausted", None, keyspace, keyspace)
+            if proc.returncode == 0:
+                # 已破解但 7-Zip 复核没过，不能当成正常跑完
+                return ("error", None, done_equiv, keyspace)
             if _PROBE_DEVICE is not None:
                 # -d 在少数多显卡机器上可能对不上，退回默认设备集合再试一次
                 _disable_device_selection()
