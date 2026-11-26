@@ -1,0 +1,16 @@
+hashcat 8.0.0
+================
+Copyright (c) 2015-2026, hashcat project
+License: MIT
+Source: https://hashcat.net / https://github.com/hashcat/hashcat
+本目录下的 hashcat-8.0.0.7z 为官方发布包，未做修改。运行时解压到
+%LOCALAPPDATA%\ArchivePassFinder\hashcat-8.0.0\ 后由程序调用。
+
+7z2hashcat 2.0
+================
+Copyright (c) philsmd
+License: public domain（捐赠给 hashcat 项目）
+Source: https://github.com/philsmd/7z2hashcat
+用于从加密 7z 中提取 hashcat 可用的哈希。
+
+以上工具只在处理 AES-ZIP / 7z 时使用；没有它们时程序自动回退 CPU。
