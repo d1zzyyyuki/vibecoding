@@ -88,7 +88,11 @@
         ["Rating", "Rating"],
         ["KAST", "KAST"],
         ["ADR", "ADR"],
-        ["Bo3", "Bo3"]
+        ["Bo3", "Bo3"],
+        ["Stage 1", "Stage 1"],
+        ["Stage 2", "Stage 2"],
+        ["Stage 3", "Stage 3"],
+        ["Stage 4", "Stage 4"]
     ];
 
     var STYLE_CLASS = "hltv-zh-translation";
@@ -174,6 +178,11 @@
         text = text.replace(/少校|特锦赛/g, "Major");
         text = text.replace(/林恩视觉|林恩视野/g, "LVG");
         text = text.replace(/贝特布姆/gi, "BB");
+        // 阶段名统一下来，避免“第一阶段”和“第2阶段”混用
+        text = text.replace(/第\s*1\s*阶段|第一阶段/g, "Stage 1");
+        text = text.replace(/第\s*2\s*阶段|第二阶段/g, "Stage 2");
+        text = text.replace(/第\s*3\s*阶段|第三阶段/g, "Stage 3");
+        text = text.replace(/第\s*4\s*阶段|第四阶段/g, "Stage 4");
         // 机翻偶尔会用错战队称呼；CS 圈统一叫战队
         text = text.replace(/球队/g, "战队");
         return text;
@@ -196,6 +205,26 @@
         match = text.match(/^Frustration for (.+?) after (\d+-\d+) exit\.?$/i);
         if (match) {
             return "以" + match[2] + "出局后，" + match[1].trim() + "感到沮丧";
+        }
+        match = text.match(/^(.+?)\s+qualif(?:y|ies) for (Stage \d+) over (.+?)\.?$/i);
+        if (match) {
+            return match[1].trim() + "战胜" + match[3].trim() + "，晋级" + match[2];
+        }
+        match = text.match(/^(.+?)\s+qualif(?:y|ies) for (Stage \d+)\.?$/i);
+        if (match) {
+            return match[1].trim() + "晋级" + match[2];
+        }
+        match = text.match(/^(.+?)\s+advance(?:s)? to (Stage \d+)\.?$/i);
+        if (match) {
+            return match[1].trim() + "晋级" + match[2];
+        }
+        match = text.match(/^(.+?)\s+eliminate (.+?) from (.+?)\.?$/i);
+        if (match) {
+            return match[1].trim() + "将" + match[2].trim() + "淘汰出" + match[3].trim();
+        }
+        match = text.match(/^(.+?)\s+bench(?:es)? (.+?)\.?$/i);
+        if (match) {
+            return match[1].trim() + "将" + match[2].trim() + "放上替补席";
         }
         return "";
     }
@@ -364,6 +393,7 @@
 
     function scanComments() {
         var selectors = [
+            ".forum-middle",
             ".thread-message-text",
             ".comment-body",
             ".comment-content",
@@ -381,6 +411,10 @@
                 }
                 var text = (element.innerText || "").trim();
                 if (text.length < 8 || isChinese(text)) {
+                    return;
+                }
+                // 登录提示不是评论，不要给它加参考翻译
+                if (/Login or register|登录或注册|add your comment to the discussion/i.test(text)) {
                     return;
                 }
                 seen.add(element);
@@ -409,7 +443,8 @@
 
     function addNick(element, nickname) {
         if (!element || !nickname || element.querySelector("." + NICK_CLASS) ||
-            element.closest("." + STYLE_CLASS) || element.getAttribute("data-hltv-zh-nick") === "1") {
+            element.closest("." + STYLE_CLASS) || element.closest(".forum-middle") ||
+            element.getAttribute("data-hltv-zh-nick") === "1") {
             return;
         }
         element.setAttribute("data-hltv-zh-nick", "1");
@@ -432,7 +467,7 @@
                     var parent = node.parentElement;
                     if (parent &&
                         !parent.closest("." + STYLE_CLASS) &&
-                        !parent.closest(".thread-message-text, .comment-body, .comment-content, .comment-text, .comment-message") &&
+                        !parent.closest(".forum-middle, .thread-message-text, .comment-body, .comment-content, .comment-text, .comment-message") &&
                         !parent.closest("a[href*=\"/news/\"], .newstext") &&
                         !parent.closest("script, style, textarea, input, option")) {
                         var nickname = findNickname(text, PLAYER_NICKS, true) ||

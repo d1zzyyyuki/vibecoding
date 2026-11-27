@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "HLTV-AdBlocker · 反立即捡钱插件",
   "short_name": "HLTV AdBlock",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "在 HLTV.org 屏蔽赌博、弹窗和背景广告，并为新闻、评论、选手和战队补充中文参考。",
   "homepage_url": "https://github.com/d1zzyyyuki/vibecoding/tree/main/03-HLTV-AdBlocker",
   "icons": {
@@ -44,6 +44,6 @@
     }
   ],
   "action": {
-    "default_title": "HLTV-AdBlocker · 反立即捡钱插件"
+    "default_title": "HLTV-AdBlocker · 反立即捡钱插件 · by cbd"
   }
 }

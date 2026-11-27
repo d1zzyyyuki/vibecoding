@@ -128,3 +128,22 @@ body[data-href]::before {
     font-size: 0.85em !important;
     font-weight: 400 !important;
 }
+
+/* 作者小水印：放在 HLTV 顶部导航左侧空位 */
+#hltv-adblocker-watermark {
+    position: fixed !important;
+    top: 12px !important;
+    left: 12px !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: 2147483647 !important;
+    color: rgba(160, 170, 185, 0.58) !important;
+    font-family: "Segoe UI", Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    letter-spacing: 0.5px !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+    pointer-events: none !important;
+    user-select: none !important;
+}

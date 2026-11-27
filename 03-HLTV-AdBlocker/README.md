@@ -2,9 +2,20 @@
 
 在 `hltv.org` 上屏蔽赌博、弹窗、背景和横幅广告，并为新闻、评论、选手和战队补充中文参考。
 
-**版本：v1.1.1 · Microsoft Edge / Chromium · 安装后单文件 CRX**
+**版本：v1.1.2 · Microsoft Edge / Chromium · 安装后单文件 CRX**
 
-[下载 HLTV-AdBlocker.crx](https://github.com/d1zzyyyuki/vibecoding/releases/tag/hltv-adblocker-v1.1.1)
+[下载 HLTV-AdBlocker.crx](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.1.2/HLTV-AdBlocker.crx) · [下载 Edge 白名单 CMD](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.1.2/HLTV-AdBlocker-Edge-Policy.cmd)
+
+## v1.1.2 新增
+
+- 修复 `Lynn Vision qualify for Stage 2 over HEROIC` 译成“通过 HEROIC 进入第 2 阶段”的问题，现在输出 `LVG战胜HEROIC，晋级Stage 2`
+- `Stage 1` / `Stage 2` 等阶段名统一保留英文，不再混用“第一阶段 / 第2阶段”
+- `eliminate` 不再译成“消除”，改成“淘汰出”
+- `bench` 不再译成“替补”，改成“将选手放上替补席”
+- 修复比赛/新闻评论没有参考翻译的问题；HLTV 实际评论容器是 `.forum-middle`
+- 修复把“登录或注册即可评论”的提示误当成评论翻译的问题
+- HLTV 页面顶部导航左侧加入低调的 `by cbd` 水印
+- 保留 v1.1.1 的全部别称、广告过滤和翻译修复
 
 ## v1.1.1 新增
 
@@ -40,7 +51,7 @@ HLTV 的比赛数据和赛程更新很快，但页面会夹带大量赌博/博�
 3. 如果看到 **允许来自其他应用商店的扩展**，也打开
 4. 把 `HLTV-AdBlocker.crx` 拖进扩展页面
 5. 完全退出 Edge（任务栏右键退出，而不是只关窗口）
-6. 右键 `HLTV-AdBlocker-Edge-Policy.cmd`，选择 **以管理员身份运行**
+6. 右键 [`HLTV-AdBlocker-Edge-Policy.cmd`](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.1.2/HLTV-AdBlocker-Edge-Policy.cmd)，选择 **以管理员身份运行**
 7. 重新打开 Edge，把 HLTV-AdBlocker 的开关打开
 8. 刷新 HLTV 页面
 
@@ -114,6 +125,14 @@ dist/HLTV-AdBlocker.crx
 首次构建会在 `keys/` 下生成签名私钥，后续构建复用它，保证扩展 ID 稳定。`keys/` 和 `dist/` 都不进仓库。
 
 ## 更新记录
+
+### v1.1.2
+
+- 修复 LVG / HEROIC 晋级句的语义。
+- Stage 1 / Stage 2 统一保留英文。
+- `eliminate` 改译“淘汰出”，`bench` 改译“放上替补席”。
+- 修复新闻/比赛评论翻译；排除登录提示，不再误翻。
+- 页面顶部导航左侧加入 `by cbd` 水印。
 
 ### v1.1.1
 

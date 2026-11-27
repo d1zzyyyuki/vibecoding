@@ -16,6 +16,23 @@
     }
     window.__hltvAdBlockerLoaded = true;
 
+    function addWatermark() {
+        if (!document.body || document.getElementById("hltv-adblocker-watermark")) {
+            return;
+        }
+        var mark = document.createElement("div");
+        mark.id = "hltv-adblocker-watermark";
+        mark.textContent = "by cbd";
+        mark.setAttribute("aria-hidden", "true");
+        document.body.appendChild(mark);
+    }
+
+    if (document.body) {
+        addWatermark();
+    } else {
+        document.addEventListener("DOMContentLoaded", addWatermark, { once: true });
+    }
+
     var PROTECTED = [
         ".betting",
         "#betting",
