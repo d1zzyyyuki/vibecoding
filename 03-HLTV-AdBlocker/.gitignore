@@ -1,0 +1,6 @@
+dist/
+keys/
+*.pem
+*.crx
+__pycache__/
+_metadata/

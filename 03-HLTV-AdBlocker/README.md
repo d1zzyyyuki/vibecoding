@@ -1,0 +1,108 @@
+# HLTV-AdBlocker · 反立即捡钱插件
+
+在 `hltv.org` 上屏蔽赌博、弹窗、背景和横幅广告。
+
+**版本：v1.0.0 · Microsoft Edge / Chromium · 安装后单文件 CRX**
+
+[下载 HLTV-AdBlocker.crx](https://github.com/d1zzyyyuki/vibecoding/releases/tag/hltv-adblocker-v1.0.0)
+
+## 为什么做这个
+
+HLTV 的比赛数据和赛程更新很快，但页面会夹带大量赌博/博彩广告。直播时打开 HLTV，这些广告容易让直播间被平台警告。
+
+这个插件只清理广告，不碰 HLTV 的赔率区块。
+
+## 安装（Edge）
+
+1. 打开 `edge://extensions`
+2. 打开左下角 **开发人员模式**
+3. 如果看到 **允许来自其他应用商店的扩展**，也打开
+4. 把 `HLTV-AdBlocker.crx` 拖进扩展页面
+5. 完全退出 Edge（任务栏右键退出，而不是只关窗口）
+6. 右键 `HLTV-AdBlocker-Edge-Policy.cmd`，选择 **以管理员身份运行**
+7. 重新打开 Edge，把 HLTV-AdBlocker 的开关打开
+8. 刷新 HLTV 页面
+
+如果之前装过旧版，先删除旧扩展，再重复第 4–7 步。
+
+### 关于“单文件”
+
+严格说，下载下来是 **CRX + CMD 两个小文件**，因为 Edge 158 必须先做一次白名单校验；这不是插件要求，是浏览器的限制。
+
+- CMD 只需要运行一次，之后扩展本体就是一个 **CRX 单文件**。
+- 不需要解压、不需要加载文件夹、没有运行依赖。
+- CMD 只是把扩展 ID 加入 Edge 白名单，可以删除；扩展安装完成后不依赖它。
+- 换电脑时仍然只需要这两个小文件，便携、下载体积约 26 KB + 1 KB。
+
+CMD 会写入一条 Edge 扩展白名单策略（`ExtensionInstallAllowlist`），只针对本扩展 ID；Edge 可能显示“由组织管理”，这是策略生效提示，不是改系统其它设置。不想要策略时，用管理员权限执行 CMD 中提示的 `reg delete` 命令即可。
+
+## 如果提示 `CRX_REQUIRED_PROOF_MISSING`
+
+这是 Edge 158 对“非 Edge 加载项商店来源”的 CRX 强制校验，和插件代码无关。扩展通常已经出现在列表里，只是开关是灰的。
+
+按上面的安装步骤执行即可。如果不想改策略，也可以兜底：从源码仓库下载 `03-HLTV-AdBlocker/extension/` 目录，用 **加载解压缩的扩展** 安装。
+
+## 会清理什么
+
+- 顶部/两侧的赌博广告位、背景广告、`logoCon` 里夹带的赞助横幅
+- Thunderpick、GG.Bet、1xBet 等博彩赞助框
+- Google Ad Manager / DoubleClick 等广告网络的请求
+- 弹窗、弹层类广告域名（PopAds、PropellerAds、Adsterra 等）
+- 动态插入的广告 iframe、广告图片和广告容器
+
+## 不会动什么
+
+- **比赛赔率、赔率表、盘口数据**
+- 赛程、比赛结果、新闻、数据页
+- HLTV 站内的正常导航和链接
+
+## 技术说明
+
+- Manifest V3
+- `declarativeNetRequest` 静态规则拦截广告网络（规则见 `extension/rules.json`）
+- Content Script 在 HLTV 页面清理残留的广告容器和背景广告
+- 不注入远程代码，不收集数据，不联网回传
+- 所有广告域名规则只在 HLTV 页面发起的第三方请求上生效（`initiatorDomains: hltv.org`）
+
+## 目录
+
+```text
+extension/           扩展源码（manifest、规则、content script、图标）
+assets/              图标母版
+tools/               图标生成、CRX 打包脚本
+dist/                构建产物（HLTV-AdBlocker.crx，不提交 Git）
+```
+
+## 构建
+
+需要 Windows + Edge（Chromium 内核）。在项目目录执行：
+
+```powershell
+.\tools\build_crx.ps1
+```
+
+产物：
+
+```text
+dist/HLTV-AdBlocker.crx
+```
+
+首次构建会在 `keys/` 下生成签名私钥，后续构建复用它，保证扩展 ID 稳定。`keys/` 和 `dist/` 都不进仓库。
+
+## 更新记录（v1.0.0 整理）
+
+- 精简扩展简介文案。
+- 补强视频播放器浮动广告、`/out2/` 广告链接容器、Betway / 九游 / 雷火 / 熊猫 / 开云 / Stake 等赞助位的过滤。
+- 重写 Edge 安装说明，补充本地 CRX 白名单方式和“运行 CMD 后保持单文件 CRX”的说明。
+- Release 继续只维护 v1.0.0，不新增版本号。
+
+## 已知限制
+
+- 本地 CRX 安装需要 Edge 开发人员模式，这是 Edge 的限制，不是插件需要联网安装
+- HLTV 改版后广告容器类名可能变化，需要更新 `content.css` / `content.js`
+- 第三方直播 iframe 内部的广告不在本插件控制范围内
+- 没有上架 Edge 加载项商店，因此不会自动更新
+
+## License
+
+MIT，见 [LICENSE](LICENSE)。

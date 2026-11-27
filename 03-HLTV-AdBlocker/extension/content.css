@@ -1,0 +1,111 @@
+/*
+ * HLTV-AdBlocker · 反立即捡钱插件
+ * 只处理广告/赞助/背景/弹窗，不碰赔率、赛程和比赛数据。
+ */
+
+/* 顶部广告条和两侧背景广告 */
+.small-logo,
+.bg-sidebar.right.wide,
+.bg-sidebar.gtSmartphone-only,
+.bg-enabler-child.left,
+.bg-enabler-child.right,
+#i1_top,
+#i1_middle,
+#i4_bottom,
+#i0_forum,
+#matchpage_1 {
+    display: none !important;
+}
+
+/* 博彩赞助框、赛事竞猜广告 */
+.presented-by,
+.thunderpick-firstcol-box,
+.ggbe-firstcol-box,
+.xbet-widget,
+.xbet-fourth,
+.ggking-new,
+.ggking-banner,
+.etbx-fourth,
+.buff-b,
+.cyberbe,
+.bitskins-col-box,
+.betting-widget,
+.betway-widget,
+[class*="betway" i],
+[class*="betting-widget" i],
+[class*="widget-ad" i],
+[class*="ad-widget" i],
+[class*="advert" i],
+.vertical-box,
+.player-of-the-week-box,
+.featured-match-widget-container,
+[data-link-tracking-page="Widget"] {
+    display: none !important;
+}
+
+/* Google Ad Manager / GPT 广告槽 */
+[id*="gpt-ad" i],
+[id^="div-gpt-ad" i],
+[data-google-query-id],
+ins.adsbygoogle,
+.adsbygoogle {
+    display: none !important;
+}
+
+/* 视频播放器上的浮动/贴片广告 */
+[class*="video-ad" i],
+[id*="video-ad" i],
+[class*="player-ad" i],
+[class*="ad-overlay" i],
+[id*="ad-overlay" i],
+[class*="overlay-ad" i],
+[class*="floating-ad" i],
+[class*="sticky-ad" i],
+[class*="ad-float" i],
+[class*="float-ad" i],
+[class*="popup-ad" i],
+[class*="ad-popup" i] {
+    display: none !important;
+}
+
+/* 常见广告容器和 iframe；赔率用的 .betting / .odds 不在此列 */
+iframe[id^="google_ads_iframe_"],
+div[data-id-prefix^="aditude-placement-"],
+[class^="ad-"],
+[class*=" ad-"],
+[class$="-ad"],
+[id^="ad-"],
+[id$="-ad"],
+[data-ad],
+[data-ad-slot],
+.ad,
+.ads,
+.advert,
+.advertisement,
+.ad-container,
+.ad-slot,
+.banner-ad,
+.sponsored,
+.sponsor-box,
+.promo-banner {
+    display: none !important;
+}
+
+/* HLTV 自带素材目录里的广告图 */
+img[src*="/retina/nextlevel/"],
+img[src*="/retina2/"],
+img[src*="/retina/farmskins/"],
+img[src*="/retina/ggbet/"],
+img[src*="/retina/egb/"],
+img[src*="/retina/kinguin/"],
+img[src*="skinwalletnews.jpg"] {
+    display: none !important;
+}
+
+/* 页面背景广告：保留纯色主题，不保留赌博推广背景 */
+html,
+body,
+body[data-href],
+body[data-href]::before {
+    background-image: none !important;
+}
