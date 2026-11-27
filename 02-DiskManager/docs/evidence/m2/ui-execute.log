@@ -1,0 +1,10 @@
+main=DiskManager 磁盘工坊
+clicked plan
+plan=DiskManager 磁盘工坊
+edits=1
+execute_enabled=True
+confirm_enabled=True
+clicked confirm
+status=执行完成；盘符已恢复，请重新扫描确认。
+closed plan
+closed main

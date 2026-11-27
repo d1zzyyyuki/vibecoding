@@ -1,0 +1,6 @@
+button=删除 enabled=True
+tool=分区工具
+start_enabled=True
+confirmed
+status=完成：已删除分区 4  日志：C:\ProgramData\DiskManager\operations\tool-delete-20261124-113305.log
+closed

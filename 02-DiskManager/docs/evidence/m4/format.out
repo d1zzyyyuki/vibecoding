@@ -1,0 +1,2 @@
+op=format success=True exit=0 message=已格式化 Z: 为 ntfs
+log=D:\dsh\work\DiskManager\out\partition-ops\format.log

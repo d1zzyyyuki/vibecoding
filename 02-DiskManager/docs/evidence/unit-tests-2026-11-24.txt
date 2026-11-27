@@ -1,0 +1,36 @@
+PASS bytes-zero  0 B
+PASS bytes-gb  1.0 GB
+PASS bytes-tb  1.0 TB
+PASS bytes-disk  953.9 GB
+PASS gpt-efi  EFI 系统分区
+PASS gpt-basic  基本数据
+PASS gpt-unknown  unknown -> null
+PASS mbr-ntfs  NTFS/exFAT
+PASS speed-format  2.49 GB/s
+PASS duration  2 分 05 秒
+PASS move-estimate  13 分 26 秒
+PASS space-low  5/100
+PASS space-threshold  10/100 boundary
+PASS space-warning  15/100
+PASS space-empty  zero total
+PASS plan-tail-valid  V: 3.0 GB → 4.0 GB；W: 右移 1.0 GB；搬移约 4.0 GB；预计 6 秒
+PASS plan-tail-no-shrink  0
+PASS plan-tail-new-start  4311744512
+PASS plan-tail-new-system  4294967296
+PASS plan-tail-steps  5
+PASS plan-tail-estimate  5351
+PASS plan-notail-valid  V: 2.0 GB → 2.5 GB；W: 右移 512.0 MB；搬移约 5.5 GB；预计 7 秒
+PASS plan-notail-shrink  403701760
+PASS plan-notail-new-start  2701131776
+PASS plan-notail-end  must stop before backup GPT
+PASS plan-notail-steps  6
+PASS plan-reject-gap  1
+PASS plan-reject-align  1
+PASS plan-reject-bitlocker  1
+PASS plan-reject-mbr  1
+PASS plan-reject-used  1
+PASS plan-reject-missing  1
+PASS json-has-disks  json structure
+PASS json-escapes-quote  quote escaped
+
+ALL PASS (34 checks)

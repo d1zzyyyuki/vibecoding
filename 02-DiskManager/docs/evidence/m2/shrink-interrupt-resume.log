@@ -1,0 +1,3 @@
+engine-run journal=...\DiskManager\out\journal\shrink-interrupt.journal
+success=True exit=0 message=completed
+journal_phase=Completed progress=2164260864 dataOffset=2164260864 dataSize=5350883328 growth=1073741824 newDataStart=3238002688

@@ -1,0 +1,13 @@
+disk 3 Msft Virtual Disk style=GPT speedMBps=20242.91
+valid=True summary=X: 2.0 GB → 3.0 GB；Y: 右移 1.0 GB；搬移约 5.0 GB；预计 —（虚拟磁盘不估算）
+oldSystem=2147483648 newSystem=3221225472 oldDataStart=2164260864 newDataStart=3238002688 oldDataSize=6291456000 newDataSize=5350883328 shrink=940572672 tailGap=133169152 move=5350883328 estimateMs=2588
+WARN BitLocker 状态尚未检测；真实执行前必须检查并拒绝加密卷。
+WARN D 盘不能有页面文件、VSS 快照或阻止锁定的打开句柄；真实执行前需逐项预检。
+WARN 整卷搬移是块级操作，建议先备份或创建系统还原点。
+WARN 当前是虚拟磁盘，文件缓存让测速值不代表物理盘；耗时估算仅作流程演示。
+STEP ShrinkDataPartition bytes=940572672 ms=0 收缩数据分区末尾 | 先把 Y: 从末尾收缩 897.0 MB，为右移腾出尾部空间；收缩后大小 5.0 GB。
+STEP LockDataVolume bytes=0 ms=200 锁定并卸载数据分区 | 关闭 Y: 上的占用，锁定卷后断开文件系统访问；失败则中止，不进入搬移。
+STEP MoveDataPartition bytes=5350883328 ms=388 整卷右移数据分区 | Y: 从 2.0 GB 移到 3.0 GB，移动 5.0 GB；按顺序读有效吞吐 65% 估算。
+STEP UpdatePartitionTable bytes=0 ms=500 更新 GPT | 同时写入新的系统分区长度和数据分区起点；写入前备份 GPT，写入失败必须中止并恢复。
+STEP ExtendSystemVolume bytes=1073741824 ms=1000 在线扩展系统卷 | 调用 FSCTL_EXTEND_VOLUME 把 X: 扩到 3.0 GB；系统卷保持在线。
+STEP Verify bytes=0 ms=500 重新扫描并校验 | 重新读取 GPT 和卷信息，检查系统盘可用空间、数据分区文件系统与日志状态。

@@ -1,5 +1,6 @@
 __pycache__/
 *.py[cod]
 *.log
+!02-DiskManager/docs/evidence/**/*.log
 .DS_Store
 Thumbs.db

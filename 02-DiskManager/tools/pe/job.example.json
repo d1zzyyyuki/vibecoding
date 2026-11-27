@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "diskNumber": 2,
+  "diskSerial": "",
+  "diskSize": 12884901888,
+  "systemPartition": 2,
+  "systemOffset": 16777216,
+  "systemSize": 2147483648,
+  "growthBytes": 1073741824,
+  "donors": [
+    { "partition": 3, "offset": 2164260864, "size": 2147483648, "shrinkBytes": 536870912 },
+    { "partition": 4, "offset": 4311744512, "size": 2147483648, "shrinkBytes": 268435456 },
+    { "partition": 5, "offset": 6459228160, "size": 2147483648, "shrinkBytes": 268435456 }
+  ]
+}

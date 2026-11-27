@@ -1,0 +1,2 @@
+engine-run journal=...\DiskManager\out\journal\refuse-real.journal
+success=False exit=2 message=M2 test engine refuses non-virtual disks; only VHD destructive tests are allowed

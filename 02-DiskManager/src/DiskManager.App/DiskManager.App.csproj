@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>DiskManager</AssemblyName>
+    <RootNamespace>DiskManager</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <StartupObject>DiskManager.App</StartupObject>
+    <GenerateSupportedRuntime>false</GenerateSupportedRuntime>
+    <ApplicationIcon>..\..\assets\DiskManager.ico</ApplicationIcon>
+    <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+    <EnableDefaultApplicationDefinition>true</EnableDefaultApplicationDefinition>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\DiskManager.Core\**\*.cs" Exclude="..\DiskManager.Core\bin\**;..\DiskManager.Core\obj\**" Link="Core\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Resource Include="Assets\Furina.jpg" />
+    <Resource Include="Assets\Logo.png" />
+  </ItemGroup>
+</Project>

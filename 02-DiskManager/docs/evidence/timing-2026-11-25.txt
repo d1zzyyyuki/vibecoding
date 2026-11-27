@@ -1,0 +1,17 @@
+date=2026-11-26
+machine=TEST-PC (Windows 11 25H2, build 26200)
+exe=dist\DiskManager.exe (623104 bytes)
+sha256=691D1A1E9C5108D0B533174648C10457D0C16A3606635104594EF543E381194C
+version=1.0.0
+process_to_window_loaded_ms=161 (1320x840 run)
+process_to_window_loaded_ms=209 (1180x760 run)
+scan_duration_ms=57 to 59 (scanner, includes read + write probe and PCIe lookup)
+selftest_duration_ms=59
+unit_tests=38 passed
+defender=no threats
+single_exe=copy of DiskManager.exe alone in an empty directory launches and screenshots
+screenshots=docs/screenshots/main-1320.png, data-d-1180.png, main-en-1320.png, expand-c-zero-820.png, expand-c-en-820.png
+design=blue cold glass, stronger Furina background, gear icon, by cbd, main/C/tools EN
+c_expand=multi-donor planner, editable values, GB/MB, job JSON, PE staging copy
+partition_tools=split default free/2, range (0-max), auto MB/GB, default TextBox template fixes keyboard input
+pe_design=docs/PE-OFFLINE.md; image not built (ADK setup blocked by Windows Installer 1618)

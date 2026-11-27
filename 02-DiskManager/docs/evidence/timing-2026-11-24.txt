@@ -1,0 +1,17 @@
+date=2026-11-24
+machine=TEST-PC (Windows 11 25H2, build 26200)
+exe=dist\DiskManager.exe (236544 bytes)
+sha256=BF707DA9E714422A700CAAB5BA02542A2CC8AEAD5D9BEF0DE52218A15CCF61B1
+process_to_window_loaded_ms=183 (1320x840 run)
+process_to_window_loaded_ms=184 (1180x760 run)
+scan_duration_ms=50 (scanner, includes speed probe and PCIe lookup)
+scan_await_ms=142 to 157 (background scan plus first UI binding pass)
+selftest_duration_ms=50 to 51
+unit_tests=34 passed
+defender=no threats
+mean_luma_overall=21.36 (left 20.28, center 25.38, right 18.07, map 45.87)
+screenshots=docs/screenshots/main-1320.png, docs/screenshots/data-d-1180.png, docs/screenshots/plan-vhd-ui-940.png
+m2_tests=full-move, controlled-interrupt+resume, rollback, hard-kill+resume, shrink+move, shrink+interrupt+resume, UI full-flow execute, GPT-data-start rollback/resume, GPT-updated rollback/resume all passed on VHD
+m4_tests=create 512MB, format NTFS, delete, split W 4GB->3.5GB + 512MB; payload SHA256 unchanged; real disk refused; UI create via Automation passed
+m2_evidence=docs/evidence/m2-online-engine-2026-11-24.md
+m4_evidence=docs/evidence/m4-partition-ops-2026-11-24.md

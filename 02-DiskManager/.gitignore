@@ -1,0 +1,11 @@
+bin/
+obj/
+dist/
+out/
+*.user
+*.suo
+.vs/
+TestResults/
+*.wixpdb
+*.log
+!docs/evidence/**/*.log

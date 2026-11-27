@@ -1,0 +1,5 @@
+engine-run journal=...\DiskManager\out\journal\recovery.journal
+success=False exit=3 message=simulated failure after GPT data-start update
+plan_valid=True summary=V: 3.0 GB → 4.0 GB；W: 右移 1.0 GB；搬移约 4.0 GB；预计 —（虚拟磁盘不估算）
+plan_newSystem=4294967296 plan_newDataStart=4311744512
+journal_phase=GptDataStartUpdated progress=3238002688 dataOffset=3238002688 dataSize=4294967296 growth=1073741824 newDataStart=4311744512

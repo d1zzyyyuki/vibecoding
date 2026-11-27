@@ -1,0 +1,2 @@
+op=delete success=True exit=0 message=已删除分区 4
+log=D:\dsh\work\DiskManager\out\partition-ops\delete.log

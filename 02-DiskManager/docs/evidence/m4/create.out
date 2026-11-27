@@ -1,0 +1,2 @@
+op=create success=True exit=0 message=已创建 Z:
+log=D:\dsh\work\DiskManager\out\partition-ops\create.log

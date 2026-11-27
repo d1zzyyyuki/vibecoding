@@ -1,0 +1,6 @@
+button=格式化 enabled=True
+tool=分区工具
+start_enabled=True
+confirmed
+status=完成：已格式化 Z: 为 ntfs  日志：C:\ProgramData\DiskManager\operations\tool-format-20261124-113244.log
+closed

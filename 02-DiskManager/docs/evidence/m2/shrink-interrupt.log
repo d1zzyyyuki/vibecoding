@@ -1,0 +1,5 @@
+engine-run journal=...\DiskManager\out\journal\shrink-interrupt.journal
+success=False exit=3 message=simulated interruption after 536870912 bytes
+plan_valid=True summary=X: 2.0 GB → 3.0 GB；Y: 右移 1.0 GB；搬移约 5.0 GB；预计 —（虚拟磁盘不估算）
+plan_newSystem=3221225472 plan_newDataStart=3238002688
+journal_phase=Moving progress=6978273280 dataOffset=2164260864 dataSize=5350883328 growth=1073741824 newDataStart=3238002688

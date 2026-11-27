@@ -1,0 +1,26 @@
+commands:
+select volume W
+shrink desired=512
+create partition primary size=512
+format fs=ntfs quick label=SPLIT
+assign letter=Z
+
+
+Microsoft DiskPart 版本 10.0.26100.1150
+
+Copyright (C) Microsoft Corporation.
+在计算机上: TEST-PC
+
+卷 5 是所选卷。
+
+DiskPart 成功收缩卷:  512 MB
+
+DiskPart 成功地创建了指定分区。
+
+    0 百分比已完成  100 百分比已完成
+
+DiskPart 成功格式化该卷。
+
+DiskPart 成功地分配了驱动器号或装载点。
+
+verified: sourceSize=3758096384 new=Z:

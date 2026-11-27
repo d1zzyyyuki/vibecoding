@@ -1,0 +1,18 @@
+commands:
+select disk 2
+select partition 4
+delete partition override
+
+
+Microsoft DiskPart 版本 10.0.26100.1150
+
+Copyright (C) Microsoft Corporation.
+在计算机上: TEST-PC
+
+磁盘 2 现在是所选磁盘。
+
+分区 4 现在是所选分区。
+
+DiskPart 成功地删除了所选分区。
+
+verified: partition 4 removed

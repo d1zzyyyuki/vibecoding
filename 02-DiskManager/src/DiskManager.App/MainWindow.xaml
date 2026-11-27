@@ -1,0 +1,1184 @@
+<Window x:Class="DiskManager.MainWindow"
+
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+
+        xmlns:controls="clr-namespace:DiskManager.Controls"
+
+        Title="磁盘管理器 · DiskManager"
+
+        Width="1320" Height="840" MinWidth="1180" MinHeight="760"
+
+        WindowStyle="None" ResizeMode="CanResize" AllowsTransparency="False"
+
+        WindowStartupLocation="CenterScreen"
+
+        Background="{StaticResource WindowBg}" Foreground="{StaticResource TextPrimary}"
+
+        FontFamily="{StaticResource UiFont}" UseLayoutRounding="True" SnapsToDevicePixels="True"
+
+        TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType"
+
+        SourceInitialized="Window_SourceInitialized" StateChanged="Window_StateChanged"
+
+        Loaded="Window_Loaded">
+
+    <WindowChrome.WindowChrome>
+
+        <WindowChrome CaptionHeight="48" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
+
+    </WindowChrome.WindowChrome>
+
+
+
+    <Window.Resources>
+
+        <Style x:Key="TableHeaderText" TargetType="TextBlock">
+
+            <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+
+            <Setter Property="FontSize" Value="10" />
+
+            <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+
+            <Setter Property="VerticalAlignment" Value="Center" />
+
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+
+            <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+
+            <Setter Property="FontSize" Value="10.5" />
+
+            <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+
+            <Setter Property="VerticalAlignment" Value="Center" />
+
+        </Style>
+
+        <Style x:Key="FieldValue" TargetType="TextBlock">
+
+            <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+
+            <Setter Property="FontSize" Value="11.5" />
+
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+
+            <Setter Property="VerticalAlignment" Value="Center" />
+
+        </Style>
+
+    </Window.Resources>
+
+
+
+    <Grid x:Name="Root" ClipToBounds="True">
+
+        <Rectangle Fill="{StaticResource WindowBg}" />
+
+        <Image Source="/Assets/Furina.jpg" Stretch="UniformToFill" Opacity="0.62" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality" />
+
+        <Rectangle IsHitTestVisible="False">
+
+            <Rectangle.Fill>
+
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+
+                    <GradientStop Color="#C6050B16" Offset="0" />
+
+                    <GradientStop Color="#8A071424" Offset="0.52" />
+
+                    <GradientStop Color="#B0081728" Offset="1" />
+
+                </LinearGradientBrush>
+
+            </Rectangle.Fill>
+
+        </Rectangle>
+
+        <Ellipse Width="760" Height="540" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-260,-220,0,0"
+
+                 Fill="{StaticResource GlowWarm}" IsHitTestVisible="False" />
+
+        <Ellipse Width="680" Height="520" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-220,-240"
+
+                 Fill="{StaticResource GlowRose}" IsHitTestVisible="False" />
+
+
+
+        <Grid>
+
+            <Grid.RowDefinitions>
+
+                <RowDefinition Height="50" />
+
+                <RowDefinition Height="*" />
+
+                <RowDefinition Height="42" />
+
+            </Grid.RowDefinitions>
+
+
+
+            <!-- Title bar -->
+
+            <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+
+                <Grid.ColumnDefinitions>
+
+                    <ColumnDefinition Width="Auto" />
+
+                    <ColumnDefinition Width="*" />
+
+                    <ColumnDefinition Width="Auto" />
+
+                </Grid.ColumnDefinitions>
+
+
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
+
+                    <Image Source="/Assets/Logo.png" Width="32" Height="32" Stretch="Uniform" />
+
+                    <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+
+                        <StackPanel Orientation="Horizontal">
+
+                            <TextBlock Text="DiskManager" FontFamily="{StaticResource DisplayFont}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextTitle}" />
+
+                            <TextBlock x:Name="BrandChinese" Text="磁盘管理器" FontSize="10" Foreground="{StaticResource TextMuted}" Margin="8,2,0,0" VerticalAlignment="Center" />
+
+                        </StackPanel>
+
+                        <TextBlock Text="by cbd" FontSize="9" Foreground="{StaticResource TextFaint}" Margin="0,1,0,0" />
+
+                    </StackPanel>
+
+                </StackPanel>
+
+
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,14,0"
+
+                            WindowChrome.IsHitTestVisibleInChrome="True">
+
+                    <Border Background="#1458C7FF" BorderBrush="#3358C7FF" BorderThickness="1" CornerRadius="7" Padding="8,3" Margin="0,0,8,0">
+
+                        <StackPanel Orientation="Horizontal">
+
+                            <Ellipse Width="5" Height="5" Fill="{StaticResource SystemBlue}" Margin="0,0,5,0" VerticalAlignment="Center" />
+
+                            <TextBlock Text="管理员" FontSize="9.5" Foreground="{StaticResource SystemBlue}" />
+
+                        </StackPanel>
+
+                    </Border>
+
+                    <Button Style="{StaticResource TitleBarButton}" Click="Minimize_Click" ToolTip="最小化" WindowChrome.IsHitTestVisibleInChrome="True">
+
+                        <Path Width="12" Height="12" Stroke="#AFC8E1" StrokeThickness="1.2" Data="M 2 8 L 12 8" />
+
+                    </Button>
+
+                    <Button Style="{StaticResource TitleBarButton}" Click="Maximize_Click" ToolTip="最大化" WindowChrome.IsHitTestVisibleInChrome="True">
+
+                        <Path Width="12" Height="12" Stroke="#AFC8E1" StrokeThickness="1.2" Data="M 3 3 L 11 3 L 11 11 L 3 11 Z" />
+
+                    </Button>
+
+                    <Button Style="{StaticResource CloseTitleBarButton}" Click="Close_Click" ToolTip="关闭" WindowChrome.IsHitTestVisibleInChrome="True">
+
+                        <Path Width="12" Height="12" Stroke="#E8F3FF" StrokeThickness="1.25" Data="M 3 3 L 11 11 M 11 3 L 3 11" />
+
+                    </Button>
+
+                </StackPanel>
+
+            </Grid>
+
+
+
+            <!-- Content -->
+
+            <Grid Grid.Row="1" Margin="20,0,20,0">
+
+                <Grid.ColumnDefinitions>
+
+                    <ColumnDefinition Width="272" />
+
+                    <ColumnDefinition Width="14" />
+
+                    <ColumnDefinition Width="*" />
+
+                    <ColumnDefinition Width="14" />
+
+                    <ColumnDefinition Width="304" />
+
+                </Grid.ColumnDefinitions>
+
+
+
+                <!-- Disk list -->
+
+                <Grid Grid.Column="0">
+
+                    <Grid.RowDefinitions>
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="*" />
+
+                        <RowDefinition Height="Auto" />
+
+                    </Grid.RowDefinitions>
+
+
+
+                    <StackPanel Orientation="Horizontal" Margin="2,0,0,8">
+
+                        <TextBlock Text="物理磁盘" Style="{StaticResource SectionLabel}" FontSize="11" VerticalAlignment="Center" />
+
+                        <Border Style="{StaticResource BadgeBorder}" Margin="8,0,0,0">
+
+                            <TextBlock Text="{Binding DiskCountText}" Style="{StaticResource BadgeText}" />
+
+                        </Border>
+
+                        <TextBlock Text="PHYSICAL DISKS" Style="{StaticResource BadgeText}" FontSize="9" Margin="8,0,0,0" VerticalAlignment="Center" />
+
+                    </StackPanel>
+
+
+
+                    <ListBox Grid.Row="1" Style="{StaticResource FlatListBox}" ItemContainerStyle="{StaticResource DiskListItem}"
+
+                             MaxHeight="320" ItemsSource="{Binding Disks}" SelectedItem="{Binding SelectedDisk, Mode=TwoWay}">
+
+                        <ListBox.ItemTemplate>
+
+                            <DataTemplate>
+
+                                <Border x:Name="Card" Background="{StaticResource Panel}" BorderBrush="{StaticResource Stroke}"
+
+                                        BorderThickness="1" CornerRadius="14" Padding="13,12" ToolTip="{Binding Tooltip}">
+
+                                    <Grid>
+
+                                        <Grid.RowDefinitions>
+
+                                            <RowDefinition Height="Auto" />
+
+                                            <RowDefinition Height="Auto" />
+
+                                            <RowDefinition Height="Auto" />
+
+                                            <RowDefinition Height="Auto" />
+
+                                            <RowDefinition Height="Auto" />
+
+                                        </Grid.RowDefinitions>
+
+                                        <Grid>
+
+                                            <TextBlock Text="{Binding DiskIndexText}" Style="{StaticResource MonoText}" FontSize="9.5" />
+
+                                            <Border HorizontalAlignment="Right" Style="{StaticResource BadgeBorder}" Padding="7,1">
+
+                                                <TextBlock Text="{Binding RoleText}" Style="{StaticResource BadgeText}" />
+
+                                            </Border>
+
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="1" Text="{Binding Title}" FontSize="13" FontWeight="SemiBold"
+
+                                                   Foreground="{StaticResource TextTitle}" TextTrimming="CharacterEllipsis" Margin="0,3,0,6" />
+
+                                        <StackPanel Grid.Row="2" Orientation="Horizontal">
+
+                                            <Border Background="#14FFFFFF" CornerRadius="5" Padding="6,1" Margin="0,0,5,0">
+
+                                                <TextBlock Text="{Binding BadgeBus}" FontSize="9.5" Foreground="{StaticResource TextMuted}" />
+
+                                            </Border>
+
+                                            <Border Background="#14FFFFFF" CornerRadius="5" Padding="6,1">
+
+                                                <TextBlock Text="{Binding BadgeMedia}" FontSize="9.5" Foreground="{StaticResource TextMuted}" />
+
+                                            </Border>
+
+                                        </StackPanel>
+
+                                        <Grid Grid.Row="3" Margin="0,10,0,0">
+
+                                            <controls:UsageBar Height="5" Percent="{Binding UsagePercent}" TrackBrush="{StaticResource Track}"
+
+                                                               FillBrush="{StaticResource AccentGradient}" VerticalAlignment="Top" />
+
+                                            <Grid Margin="0,6,0,0">
+
+                                                <TextBlock Text="{Binding UsedDisplayText}" FontSize="10" Foreground="{StaticResource TextMuted}" />
+
+                                                <TextBlock Text="{Binding FreeDisplayText}" FontSize="10" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Right" />
+
+                                            </Grid>
+
+                                        </Grid>
+
+                                        <Grid Grid.Row="4" Margin="0,8,0,0">
+
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                                                <Ellipse Width="5" Height="5" Fill="{StaticResource AccentOrange}" Margin="0,0,6,0" VerticalAlignment="Center" />
+
+                                                <TextBlock Text="{Binding SpeedText}" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" TextTrimming="CharacterEllipsis" ToolTip="{Binding SpeedTooltip}" />
+
+                                            </StackPanel>
+
+                                            <TextBlock Text="{Binding UsagePercentText}" FontSize="10" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+                                        </Grid>
+
+                                    </Grid>
+
+                                </Border>
+
+                                <DataTemplate.Triggers>
+
+                                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+
+                                        <Setter TargetName="Card" Property="Background" Value="#12FFFFFF" />
+
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+
+                                        <Setter TargetName="Card" Property="Background" Value="#1FE89A57" />
+
+                                        <Setter TargetName="Card" Property="BorderBrush" Value="{StaticResource AccentOrange}" />
+
+                                    </DataTrigger>
+
+                                </DataTemplate.Triggers>
+
+                            </DataTemplate>
+
+                        </ListBox.ItemTemplate>
+
+                    </ListBox>
+
+
+
+                    <Border Grid.Row="2" Style="{StaticResource CardSoft}" Margin="0,10,0,0" Padding="13,12">
+
+                        <StackPanel>
+
+                            <Grid>
+
+                                <TextBlock Text="全机容量" Style="{StaticResource SectionLabel}" FontSize="10" />
+
+                                <TextBlock Text="{Binding TotalUsagePercentText}" FontSize="10" Foreground="{StaticResource AccentOrange}" HorizontalAlignment="Right" />
+
+                            </Grid>
+
+                            <controls:UsageBar Height="6" Percent="{Binding TotalUsagePercent}" TrackBrush="{StaticResource Track}" FillBrush="{StaticResource AccentGradient}" Margin="0,8,0,0" />
+
+                            <Grid Margin="0,7,0,0">
+
+                                <TextBlock Text="{Binding TotalFreeDisplayText}" FontSize="10.5" Foreground="{StaticResource TextPrimary}" />
+
+                                <TextBlock Text="{Binding TotalCapacityDisplayText}" FontSize="10" Foreground="{StaticResource TextFaint}" HorizontalAlignment="Right" />
+
+                            </Grid>
+
+                            <Border Height="1" Background="{StaticResource Divider}" Margin="0,10,0,9" />
+
+                            <Grid>
+
+                                <TextBlock Text="{Binding TotalUsedDisplayText}" FontSize="10" Foreground="{StaticResource TextMuted}" />
+
+                                <TextBlock Text="{Binding ScanDurationDisplayText}" FontSize="10" Foreground="{StaticResource TextFaint}" HorizontalAlignment="Right" />
+
+                            </Grid>
+
+                        </StackPanel>
+
+                    </Border>
+
+
+
+                    <Border Grid.Row="3" Style="{StaticResource CardSoft}" Margin="0,10,0,0" Padding="13,12" VerticalAlignment="Stretch">
+
+                        <StackPanel>
+
+                            <TextBlock Text="使用提示" Style="{StaticResource SectionLabel}" FontSize="10" />
+
+                            <TextBlock Text="点击左侧磁盘，中间切换该盘的分区布局。" FontSize="10.5" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" Margin="0,9,0,0" LineHeight="17" />
+
+                            <TextBlock Text="悬停分区色条可查看卷标、容量与空闲。" FontSize="10.5" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" Margin="0,6,0,0" LineHeight="17" />
+
+                            <TextBlock Text="写操作会先弹出确认窗口；未授权时不写真实分区表。" FontSize="10.5" Foreground="{StaticResource TextFaint}" TextWrapping="Wrap" Margin="0,6,0,0" LineHeight="17" />
+
+                        </StackPanel>
+
+                    </Border>
+
+
+
+                    <Border Grid.Row="4" Style="{StaticResource CardSoft}" Margin="0,10,0,0" Padding="12,10">
+
+                        <StackPanel Orientation="Horizontal">
+
+                            <Ellipse Width="6" Height="6" Fill="{StaticResource SystemBlue}" Margin="0,0,7,0" VerticalAlignment="Center" />
+
+                            <TextBlock Text="本地磁盘 · 分区管理" FontSize="10.5" Foreground="{StaticResource TextMuted}" />
+
+                        </StackPanel>
+
+                    </Border>
+
+                </Grid>
+
+
+
+                <!-- Center: dDisk detail, layout, partitions -->
+
+                <Grid Grid.Column="2">
+
+                    <Grid.RowDefinitions>
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="*" />
+
+                        <RowDefinition Height="Auto" />
+
+                    </Grid.RowDefinitions>
+
+
+
+                    <Border Style="{StaticResource Card}" Padding="16,14">
+
+                        <Grid>
+
+                            <Grid.ColumnDefinitions>
+
+                                <ColumnDefinition Width="*" />
+
+                                <ColumnDefinition Width="Auto" />
+
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+
+                                    <TextBlock Text="{Binding SelectedDiskTitle}" Style="{StaticResource TitleText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+
+                                    <Border Style="{StaticResource BadgeBorder}" Margin="10,0,0,0">
+
+                                        <TextBlock Text="{Binding SelectedDisk.RoleText}" Style="{StaticResource BadgeText}" />
+
+                                    </Border>
+
+                                    <Border Style="{StaticResource BadgeBorder}" Margin="6,0,0,0">
+
+                                        <TextBlock Text="{Binding SelectedDisk.BadgeBus}" Style="{StaticResource BadgeText}" />
+
+                                    </Border>
+
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,7,0,0">
+
+                                    <TextBlock Text="{Binding SelectedDisk.CapacityText}" FontSize="11.5" Foreground="{StaticResource TextPrimary}" />
+
+                                    <TextBlock Text="总容量" FontSize="10" Foreground="{StaticResource TextFaint}" Margin="6,0,0,0" VerticalAlignment="Center" />
+
+                                    <Border Width="1" Height="10" Background="{StaticResource Divider}" Margin="12,0" />
+
+                                    <TextBlock Text="{Binding SelectedDisk.UsedText}" FontSize="11.5" Foreground="{StaticResource TextPrimary}" />
+
+                                    <TextBlock Text="已用" FontSize="10" Foreground="{StaticResource TextFaint}" Margin="6,0,0,0" VerticalAlignment="Center" />
+
+                                    <Border Width="1" Height="10" Background="{StaticResource Divider}" Margin="12,0" />
+
+                                    <TextBlock Text="{Binding SelectedDisk.FreeText}" FontSize="11.5" Foreground="{StaticResource AccentOrange}" />
+
+                                    <TextBlock Text="空闲" FontSize="10" Foreground="{StaticResource TextFaint}" Margin="6,0,0,0" VerticalAlignment="Center" />
+
+                                </StackPanel>
+
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+
+                                <TextBlock Text="{Binding SelectedDisk.PartitionCountText}" FontSize="11" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Right" />
+
+                                <StackPanel Orientation="Horizontal" Margin="0,7,0,0" HorizontalAlignment="Right">
+
+                                    <Ellipse Width="5" Height="5" Fill="{Binding SelectedDisk.HealthBrush}" Margin="0,0,5,0" VerticalAlignment="Center" />
+
+                                    <TextBlock Text="{Binding SelectedDisk.HealthText}" FontSize="10.5" Foreground="{Binding SelectedDisk.HealthBrush}" />
+
+                                </StackPanel>
+
+                                <Border Style="{StaticResource BadgeBorder}" Background="#1658C7FF" Margin="0,7,0,0" HorizontalAlignment="Right">
+
+                                    <TextBlock Text="{Binding SelectedDisk.ReadSpeedText}" FontSize="9.5" Foreground="{StaticResource SystemBlue}" />
+
+                                </Border>
+
+                            </StackPanel>
+
+                        </Grid>
+
+                    </Border>
+
+
+
+                    <Border Grid.Row="1" Background="{StaticResource DangerGradient}" BorderBrush="#40E0616B" BorderThickness="1"
+
+                            CornerRadius="12" Padding="14,10" Margin="0,10,0,0"
+
+                            Visibility="{Binding HasLowSpace, Converter={StaticResource BoolToVis}}">
+
+                        <StackPanel Orientation="Horizontal">
+
+                            <TextBlock Text="!" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Danger}" Margin="0,0,8,0" VerticalAlignment="Center" />
+
+                            <TextBlock Text="{Binding LowSpaceText}" FontSize="11.5" Foreground="{StaticResource TextPrimary}" TextWrapping="Wrap" />
+
+                        </StackPanel>
+
+                    </Border>
+
+
+
+                    <Border Grid.Row="2" Style="{StaticResource Card}" Padding="16,14" Margin="0,10,0,0">
+
+                        <StackPanel>
+
+                            <Grid>
+
+                                <TextBlock Text="分区布局" Style="{StaticResource SectionLabel}" FontSize="11" />
+
+                                <TextBlock Text="LAYOUT · 悬停查看详情" Style="{StaticResource BadgeText}" FontSize="9" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+                            </Grid>
+
+                            <controls:PartitionMap Height="46" Margin="0,11,0,9" Items="{Binding MapItems}" DiskSize="{Binding SelectedDisk.SizeBytes}" />
+
+                            <StackPanel Orientation="Horizontal">
+
+                                <Rectangle Width="9" Height="9" RadiusX="2.5" RadiusY="2.5" Fill="{StaticResource MapSystem}" VerticalAlignment="Center" />
+
+                                <TextBlock Text="系统盘" FontSize="9.5" Foreground="{StaticResource TextMuted}" Margin="5,0,14,0" />
+
+                                <Rectangle Width="9" Height="9" RadiusX="2.5" RadiusY="2.5" Fill="{StaticResource MapData}" VerticalAlignment="Center" />
+
+                                <TextBlock Text="数据盘" FontSize="9.5" Foreground="{StaticResource TextMuted}" Margin="5,0,14,0" />
+
+                                <Rectangle Width="9" Height="9" RadiusX="2.5" RadiusY="2.5" Fill="{StaticResource MapHidden}" VerticalAlignment="Center" />
+
+                                <TextBlock Text="隐藏/保留" FontSize="9.5" Foreground="{StaticResource TextMuted}" Margin="5,0,14,0" />
+
+                                <Rectangle Width="9" Height="9" RadiusX="2" RadiusY="2" Fill="{StaticResource MapFree}" Stroke="{StaticResource StrokeSoft}" StrokeThickness="1" VerticalAlignment="Center" />
+
+                                <TextBlock Text="未分配" FontSize="9.5" Foreground="{StaticResource TextMuted}" Margin="5,0,0,0" />
+
+                            </StackPanel>
+
+                            <TextBlock Text="{Binding ReservedSummaryText}" FontSize="9" Foreground="{StaticResource TextFaint}" Margin="0,7,0,0"
+
+                                       TextTrimming="CharacterEllipsis" Visibility="{Binding HasReservedPartitions, Converter={StaticResource BoolToVis}}" />
+
+                        </StackPanel>
+
+                    </Border>
+
+
+
+                    <Border Grid.Row="3" Style="{StaticResource Card}" Padding="0" Margin="0,10,0,0">
+
+                        <Grid IsSharedSizeScope="True">
+
+                            <Grid.RowDefinitions>
+
+                                <RowDefinition Height="Auto" />
+
+                                <RowDefinition Height="*" />
+
+                            </Grid.RowDefinitions>
+
+                            <Grid Margin="16,13,16,7">
+
+                                <Grid.ColumnDefinitions>
+
+                                    <ColumnDefinition Width="54" SharedSizeGroup="PartCol" />
+
+                                    <ColumnDefinition Width="110" SharedSizeGroup="TypeCol" />
+
+                                    <ColumnDefinition Width="64" SharedSizeGroup="FsCol" />
+
+                                    <ColumnDefinition Width="76" SharedSizeGroup="SizeCol" />
+
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="FreeCol" />
+
+                                    <ColumnDefinition Width="64" SharedSizeGroup="StatusCol" />
+
+                                    <ColumnDefinition Width="*" />
+
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="卷" Style="{StaticResource TableHeaderText}" />
+
+                                <TextBlock Grid.Column="1" Text="类型" Style="{StaticResource TableHeaderText}" />
+
+                                <TextBlock Grid.Column="2" Text="文件系统" Style="{StaticResource TableHeaderText}" />
+
+                                <TextBlock Grid.Column="3" Text="容量" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Right" />
+
+                                <TextBlock Grid.Column="4" Text="空闲空间" Style="{StaticResource TableHeaderText}" Margin="8,0,0,0" />
+
+                                <TextBlock Grid.Column="5" Text="状态" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Right" />
+
+                            </Grid>
+
+                            <Border Grid.Row="1" Height="1" Background="{StaticResource Divider}" />
+
+                            <ListBox Grid.Row="1" Style="{StaticResource FlatListBox}" ItemContainerStyle="{StaticResource PartitionListItem}"
+
+                                     ItemsSource="{Binding SelectedDisk.Partitions}" SelectedItem="{Binding SelectedPartition, Mode=TwoWay}"
+
+                                     Margin="6,7,6,6" MaxHeight="290" Background="Transparent" BorderThickness="0">
+
+                                <ListBox.ItemTemplate>
+
+                                    <DataTemplate>
+
+                                        <Border x:Name="Row" Background="Transparent" CornerRadius="9" Padding="10,8" ToolTip="{Binding Tooltip}">
+
+                                            <Grid>
+
+                                                <Grid.ColumnDefinitions>
+
+                                                    <ColumnDefinition Width="54" SharedSizeGroup="PartCol" />
+
+                                                    <ColumnDefinition Width="110" SharedSizeGroup="TypeCol" />
+
+                                                    <ColumnDefinition Width="64" SharedSizeGroup="FsCol" />
+
+                                                    <ColumnDefinition Width="76" SharedSizeGroup="SizeCol" />
+
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="FreeCol" />
+
+                                                    <ColumnDefinition Width="64" SharedSizeGroup="StatusCol" />
+
+                                                    <ColumnDefinition Width="*" />
+
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel>
+
+                                                    <TextBlock Text="{Binding TitleText}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextTitle}" />
+
+                                                    <TextBlock Text="{Binding LabelText}" FontSize="9.5" Foreground="{StaticResource TextFaint}" TextTrimming="CharacterEllipsis" />
+
+                                                </StackPanel>
+
+                                                <TextBlock Grid.Column="1" Text="{Binding TypeText}" Style="{StaticResource FieldValue}" FontSize="11" />
+
+                                                <TextBlock Grid.Column="2" Text="{Binding FileSystemText}" Style="{StaticResource FieldValue}" FontSize="11" />
+
+                                                <TextBlock Grid.Column="3" Text="{Binding SizeText}" Style="{StaticResource FieldValue}" FontSize="11" HorizontalAlignment="Right" />
+
+                                                <Grid Grid.Column="4" Width="124" Margin="8,0,0,0" VerticalAlignment="Center">
+
+                                                    <controls:UsageBar Height="4" Percent="{Binding UsagePercent}" TrackBrush="{StaticResource Track}" FillBrush="{StaticResource AccentGradient}" VerticalAlignment="Top" />
+
+                                                    <Grid Margin="0,7,0,0">
+
+                                                        <TextBlock Text="{Binding FreeText}" FontSize="10" Foreground="{StaticResource TextMuted}" />
+
+                                                        <TextBlock Text="{Binding FreePercentText}" FontSize="10" Foreground="{StaticResource TextFaint}" HorizontalAlignment="Right" />
+
+                                                    </Grid>
+
+                                                </Grid>
+
+                                                <StackPanel Grid.Column="5" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+
+                                                    <Path Width="10" Height="10" Fill="{StaticResource SystemBlue}" Margin="0,0,5,0" VerticalAlignment="Center"
+
+                                                          Visibility="{Binding IsSystem, Converter={StaticResource BoolToVis}}"
+
+                                                          Data="M 0,0 L 4.4,0 L 4.4,4.4 L 0,4.4 Z M 5.6,0 L 10,0 L 10,4.4 L 5.6,4.4 Z M 0,5.6 L 4.4,5.6 L 4.4,10 L 0,10 Z M 5.6,5.6 L 10,5.6 L 10,10 L 5.6,10 Z" />
+
+                                                    <Ellipse Width="5" Height="5" Fill="{Binding StatusBrush}" Margin="0,0,5,0" VerticalAlignment="Center" />
+
+                                                    <TextBlock Text="{Binding StatusText}" FontSize="10" Foreground="{Binding StatusBrush}" />
+
+                                                </StackPanel>
+
+                                            </Grid>
+
+                                        </Border>
+
+                                        <DataTemplate.Triggers>
+
+                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+
+                                                <Setter TargetName="Row" Property="Background" Value="#0FFFFFFF" />
+
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+
+                                                <Setter TargetName="Row" Property="Background" Value="#20E89A57" />
+
+                                            </DataTrigger>
+
+                                        </DataTemplate.Triggers>
+
+                                    </DataTemplate>
+
+                                </ListBox.ItemTemplate>
+
+                            </ListBox>
+
+                        </Grid>
+
+                    </Border>
+
+
+
+                    <Border Grid.Row="4" Style="{StaticResource Card}" Padding="16,14" Margin="0,10,0,0">
+
+                        <Grid>
+
+                            <Grid.RowDefinitions>
+
+                                <RowDefinition Height="Auto" />
+
+                                <RowDefinition Height="Auto" />
+
+                                <RowDefinition Height="Auto" />
+
+                            </Grid.RowDefinitions>
+
+                            <Grid>
+
+                                <TextBlock Text="快捷功能" Style="{StaticResource SectionLabel}" FontSize="11" />
+
+                                <TextBlock Text="QUICK ACTION" Style="{StaticResource BadgeText}" FontSize="9" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+                            </Grid>
+
+                            <StackPanel Grid.Row="1" Margin="0,10,0,0">
+
+                                <TextBlock Text="C 盘扩容" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextTitle}" />
+
+                                <TextBlock Text="从同一块物理磁盘后续的数据分区回收空间，把 C 盘边界右移；只有存在可移动分区时才可扩容。"
+
+                                           FontSize="10.5" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" Margin="0,6,0,0" LineHeight="17" />
+
+                            </StackPanel>
+
+                            <Grid Grid.Row="2" Margin="0,14,0,0">
+
+                                <TextBlock Text="先计算可扩容上限，再分配各分区收缩量。" FontSize="9.5" Foreground="{StaticResource TextFaint}" VerticalAlignment="Center" />
+
+                                <Button Content="打开扩容向导" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" VerticalAlignment="Center"
+
+                                        IsEnabled="{Binding CanExpandC}" Click="Plan_Click" ToolTip="{Binding ExpandCHint}" ToolTipService.ShowOnDisabled="True" />
+
+                            </Grid>
+
+                        </Grid>
+
+                    </Border>
+
+                    <Border Grid.Row="5" Style="{StaticResource CardSoft}" Padding="12,10" Margin="0,10,0,0">
+
+                        <Grid>
+
+                            <Grid.ColumnDefinitions>
+
+                                <ColumnDefinition Width="Auto" />
+
+                                <ColumnDefinition Width="*" />
+
+                                <ColumnDefinition Width="Auto" />
+
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                                <Button Content="新建分区" Style="{StaticResource GhostButton}" IsEnabled="{Binding CanCreatePartition}" Padding="11,6" Margin="0,0,6,0"
+
+                                        Click="CreatePartition_Click" ToolTip="{Binding PartitionToolHint}" ToolTipService.ShowOnDisabled="True" />
+
+                                <Button Content="拆分分区" Style="{StaticResource GhostButton}" IsEnabled="{Binding CanOperatePartition}" Padding="11,6" Margin="0,0,6,0"
+
+                                        Click="SplitPartition_Click" ToolTip="{Binding PartitionToolHint}" ToolTipService.ShowOnDisabled="True" />
+
+                                <Button Content="格式化" Style="{StaticResource GhostButton}" IsEnabled="{Binding CanOperatePartition}" Padding="11,6" Margin="0,0,6,0"
+
+                                        Click="FormatPartition_Click" ToolTip="{Binding PartitionToolHint}" ToolTipService.ShowOnDisabled="True" />
+
+                                <Button Content="删除" Style="{StaticResource GhostButton}" IsEnabled="{Binding CanOperatePartition}" Padding="11,6"
+
+                                        Click="DeletePartition_Click" ToolTip="{Binding PartitionToolHint}" ToolTipService.ShowOnDisabled="True" />
+
+                            </StackPanel>
+
+                            <Button Grid.Column="2" Content="刷新磁盘" Style="{StaticResource GhostButton}" Padding="13,7" Command="{Binding RefreshCommand}" />
+
+                        </Grid>
+
+                    </Border>
+
+                </Grid>
+
+
+
+                <!-- Right column -->
+
+                <Grid Grid.Column="4">
+
+                    <Grid.RowDefinitions>
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="12" />
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="12" />
+
+                        <RowDefinition Height="*" />
+
+                    </Grid.RowDefinitions>
+
+
+
+                    <Border Style="{StaticResource Card}" Padding="16,14">
+
+                        <StackPanel>
+
+                            <Grid>
+
+                                <TextBlock Text="分区详情" Style="{StaticResource SectionLabel}" FontSize="11" />
+
+                                <TextBlock Text="VOLUME" Style="{StaticResource BadgeText}" FontSize="9" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+                            </Grid>
+
+
+
+                            <Grid Visibility="{Binding SelectedPartition, Converter={StaticResource InvNullToVis}}">
+
+                                <StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+
+                                        <TextBlock Text="{Binding SelectedPartition.TitleText}" FontSize="28" FontWeight="SemiBold" Foreground="{StaticResource TextTitle}" />
+
+                                        <StackPanel Orientation="Horizontal" Margin="10,0,0,8" VerticalAlignment="Bottom">
+
+                                            <Path Width="10" Height="10" Fill="{StaticResource SystemBlue}" Margin="0,0,5,0" VerticalAlignment="Center"
+
+                                                  Visibility="{Binding SelectedPartition.IsSystem, Converter={StaticResource BoolToVis}}"
+
+                                                  Data="M 0,0 L 4.4,0 L 4.4,4.4 L 0,4.4 Z M 5.6,0 L 10,0 L 10,4.4 L 5.6,4.4 Z M 0,5.6 L 4.4,5.6 L 4.4,10 L 0,10 Z M 5.6,5.6 L 10,5.6 L 10,10 L 5.6,10 Z" />
+
+                                            <TextBlock Text="{Binding SelectedPartition.StatusText}" FontSize="10" FontWeight="SemiBold" Foreground="{Binding SelectedPartition.StatusBrush}" />
+
+                                        </StackPanel>
+
+                                    </StackPanel>
+
+                                    <TextBlock Text="{Binding SelectedPartition.LabelText}" FontSize="11" Foreground="{StaticResource TextMuted}" />
+
+                                    <Grid Margin="0,12,0,0">
+
+                                        <controls:UsageBar Height="5" Percent="{Binding SelectedPartition.UsagePercent}" TrackBrush="{StaticResource Track}" FillBrush="{StaticResource AccentGradient}" VerticalAlignment="Top" />
+
+                                        <Grid Margin="0,7,0,0">
+
+                                            <TextBlock Text="{Binding SelectedPartition.FreeDisplayText}" FontSize="10" Foreground="{StaticResource TextMuted}" />
+
+                                            <TextBlock Text="{Binding SelectedPartition.UsedPercentDisplayText}" FontSize="10" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Right" />
+
+                                        </Grid>
+
+                                    </Grid>
+
+
+
+                                    <Border Height="1" Background="{StaticResource Divider}" Margin="0,12,0,10" />
+
+
+
+                                    <Grid>
+
+                                        <Grid.ColumnDefinitions>
+
+                                            <ColumnDefinition Width="78" />
+
+                                            <ColumnDefinition Width="*" />
+
+                                        </Grid.ColumnDefinitions>
+
+                                        <Grid.RowDefinitions>
+
+                                            <RowDefinition Height="26" />
+
+                                            <RowDefinition Height="26" />
+
+                                            <RowDefinition Height="26" />
+
+                                            <RowDefinition Height="26" />
+
+                                            <RowDefinition Height="26" />
+
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Text="类型" Style="{StaticResource FieldLabel}" />
+
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedPartition.TypeText}" Style="{StaticResource FieldValue}" />
+
+                                        <TextBlock Grid.Row="1" Text="文件系统" Style="{StaticResource FieldLabel}" />
+
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedPartition.FileSystemText}" Style="{StaticResource FieldValue}" />
+
+                                        <TextBlock Grid.Row="2" Text="容量" Style="{StaticResource FieldLabel}" />
+
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedPartition.SizeText}" Style="{StaticResource FieldValue}" />
+
+                                        <TextBlock Grid.Row="3" Text="偏移" Style="{StaticResource FieldLabel}" />
+
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedPartition.OffsetText}" Style="{StaticResource FieldValue}" />
+
+                                        <TextBlock Grid.Row="4" Text="卷 GUID" Style="{StaticResource FieldLabel}" />
+
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedPartition.VolumeGuidText}" Style="{StaticResource FieldValue}" FontFamily="{StaticResource MonoFont}" FontSize="9.5" ToolTip="{Binding SelectedPartition.VolumeGuidText}" />
+
+                                    </Grid>
+
+
+
+                                    <Border Background="#0E58C7FF" BorderBrush="#2A58C7FF" BorderThickness="1" CornerRadius="10" Padding="11,8" Margin="0,10,0,0" Visibility="Collapsed">
+
+                                        <StackPanel>
+
+                                            <TextBlock Text="整卷搬移预计" FontSize="9.5" Foreground="{StaticResource TextMuted}" />
+
+                                            <TextBlock Text="{Binding SelectedPartition.MoveEstimateText}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource AccentCyan}" Margin="0,2,0,0" />
+
+                                            <TextBlock Text="{Binding SelectedPartition.MoveEstimateNote}" FontSize="9" Foreground="{StaticResource TextFaint}" />
+
+                                        </StackPanel>
+
+                                    </Border>
+
+                                </StackPanel>
+
+                            </Grid>
+
+
+
+                            <StackPanel Visibility="{Binding SelectedPartition, Converter={StaticResource NullToVis}}" Margin="0,20,0,18">
+
+                                <TextBlock Text="选择一个分区" FontSize="13" Foreground="{StaticResource TextTitle}" HorizontalAlignment="Center" />
+
+                                <TextBlock Text="在上方分区布局或列表中选择" FontSize="10.5" Foreground="{StaticResource TextFaint}" HorizontalAlignment="Center" Margin="0,5,0,0" />
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+                    </Border>
+
+
+
+                    <Border Grid.Row="2" Style="{StaticResource Card}" Padding="16,13">
+
+                        <StackPanel>
+
+                            <Grid>
+
+                                <TextBlock Text="磁盘测速" Style="{StaticResource SectionLabel}" FontSize="11" />
+
+                                <TextBlock Text="MB/S · READ + WRITE" Style="{StaticResource BadgeText}" FontSize="9" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+                            </Grid>
+
+                            <ItemsControl ItemsSource="{Binding Disks}" Margin="0,8,0,0">
+
+                                <ItemsControl.ItemTemplate>
+
+                                    <DataTemplate>
+
+                                        <Grid Margin="0,4">
+
+                                            <Grid.ColumnDefinitions>
+
+                                                <ColumnDefinition Width="*" />
+
+                                                <ColumnDefinition Width="Auto" />
+
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel>
+
+                                                <TextBlock Text="{Binding Title}" FontSize="10.5" Foreground="{StaticResource TextPrimary}" TextTrimming="CharacterEllipsis" />
+
+                                                <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+
+                                                    <TextBlock Text="{Binding ReadSpeedText}" FontSize="10" Foreground="{StaticResource SystemBlue}" />
+
+                                                    <TextBlock Text="·" FontSize="10" Foreground="{StaticResource TextFaint}" Margin="6,0" />
+
+                                                    <TextBlock Text="{Binding WriteSpeedText}" FontSize="10" Foreground="{StaticResource AccentCyan}" />
+
+                                                </StackPanel>
+
+                                            </StackPanel>
+
+                                        </Grid>
+
+                                    </DataTemplate>
+
+                                </ItemsControl.ItemTemplate>
+
+                            </ItemsControl>
+
+                        </StackPanel>
+
+                    </Border>
+
+
+
+                    <Border Grid.Row="4" Style="{StaticResource CardSoft}" Padding="15,13">
+
+                        <StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+
+                                <Border Width="22" Height="22" CornerRadius="7" Background="#16E8B45A" Margin="0,0,8,0">
+
+                                    <TextBlock Text="!" FontSize="11" FontWeight="Bold" Foreground="{StaticResource Warning}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                                </Border>
+
+                                <TextBlock Text="操作安全" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextTitle}" VerticalAlignment="Center" />
+
+                            </StackPanel>
+
+                            <TextBlock Text="所有分区写操作都会先进入确认窗口。当前构建未授权写入真实磁盘；真实盘上的执行会被拒绝，不会修改分区表。"
+
+                                       FontSize="10.5" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" Margin="0,9,0,0" LineHeight="17" />
+
+                            <Border Height="1" Background="{StaticResource Divider}" Margin="0,12,0,10" />
+
+                            <TextBlock x:Name="FooterVersion" Text="DiskManager v1.0.0 · 单文件便携版 · by cbd" FontSize="9.5" Foreground="{StaticResource TextFaint}" ToolTip="{Binding MachineText}" />
+
+                        </StackPanel>
+
+                    </Border>
+
+                </Grid>
+
+            </Grid>
+
+
+
+            <!-- Status bar -->
+
+            <Border Grid.Row="2" BorderBrush="{StaticResource Divider}" BorderThickness="0,1,0,0" Background="#40040305">
+
+                <Grid Margin="20,0">
+
+                    <Grid.ColumnDefinitions>
+
+                        <ColumnDefinition Width="*" />
+
+                        <ColumnDefinition Width="Auto" />
+
+                        <ColumnDefinition Width="*" />
+
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                        <Ellipse Width="6" Height="6" Fill="{StaticResource NormalGreen}" Margin="0,0,7,0" VerticalAlignment="Center" />
+
+                        <TextBlock Text="{Binding StatusText}" FontSize="10.5" Foreground="{StaticResource NormalGreen}" />
+
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="1" Text="{Binding LastScanText}" FontSize="9.5" Foreground="{StaticResource TextFaint}" VerticalAlignment="Center" Margin="10,0" />
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+
+                        <TextBlock Text="{Binding ScanSummaryText}" FontSize="9.5" Foreground="{StaticResource TextFaint}" Margin="0,0,12,0" />
+
+                        <Button x:Name="LanguageButton" Content="中 / EN" Style="{StaticResource GhostButton}" Padding="9,3" FontSize="9" Click="Language_Click" ToolTip="中文 / English" />
+
+                        <TextBlock Text="{Binding VersionText}" FontSize="9.5" Foreground="{StaticResource TextMuted}" FontFamily="{StaticResource MonoFont}" Margin="12,0,0,0" VerticalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+
+
+        <Border x:Name="LoadingOverlay" Background="#E6050305" Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}">
+
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                <Border Width="42" Height="42" CornerRadius="13" Background="{StaticResource AccentGradient}" HorizontalAlignment="Center">
+
+                    <Grid>
+
+                        <Ellipse Width="20" Height="20" Stroke="#FFF7F0E8" StrokeThickness="1.6" />
+
+                        <Ellipse Width="6" Height="6" Fill="#FFF7F0E8" />
+
+                    </Grid>
+
+                </Border>
+
+                <TextBlock Text="正在读取磁盘布局" FontSize="12.5" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" Margin="0,14,0,0" />
+
+                <TextBlock Text="正在读取分区信息 · 请稍候" FontSize="9.5" Foreground="{StaticResource TextFaint}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+
+            </StackPanel>
+
+        </Border>
+
+    </Grid>
+
+</Window>
+

@@ -1,0 +1,10 @@
+main=DiskManager 磁盘工坊
+create_enabled=True
+clicked create
+tool=分区工具
+start_enabled=True
+confirm_enabled=True
+clicked confirm
+status=完成：已创建 Z:  日志：C:\ProgramData\DiskManager\operations\tool-create-20261124-112423.log
+closed tool
+closed main

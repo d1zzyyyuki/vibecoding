@@ -1,0 +1,17 @@
+commands:
+select volume Z
+format fs=ntfs quick label=FORMATTED
+
+
+Microsoft DiskPart 版本 10.0.26100.1150
+
+Copyright (C) Microsoft Corporation.
+在计算机上: TEST-PC
+
+卷 6 是所选卷。
+
+    0 百分比已完成  100 百分比已完成
+
+DiskPart 成功格式化该卷。
+
+verified: filesystem=NTFS

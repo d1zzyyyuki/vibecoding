@@ -1,0 +1,80 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <FontFamily x:Key="UiFont">Microsoft YaHei UI, Segoe UI</FontFamily>
+    <FontFamily x:Key="DisplayFont">Microsoft YaHei UI, Segoe UI</FontFamily>
+    <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas, Courier New</FontFamily>
+
+    <LinearGradientBrush x:Key="WindowBg" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#040A14" Offset="0" />
+        <GradientStop Color="#071426" Offset="0.48" />
+        <GradientStop Color="#0A1A2E" Offset="1" />
+    </LinearGradientBrush>
+
+    <RadialGradientBrush x:Key="GlowWarm" Center="0.12,0.06" GradientOrigin="0.12,0.06" RadiusX="0.9" RadiusY="0.7">
+        <GradientStop Color="#3358C7FF" Offset="0" />
+        <GradientStop Color="#0058C7FF" Offset="0.66" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="GlowRose" Center="0.92,0.92" GradientOrigin="0.92,0.92" RadiusX="0.85" RadiusY="0.75">
+        <GradientStop Color="#2A3577FF" Offset="0" />
+        <GradientStop Color="#003577FF" Offset="0.64" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="GlowCyan" Center="0.82,0.16" GradientOrigin="0.82,0.16" RadiusX="0.8" RadiusY="0.7">
+        <GradientStop Color="#2A4DE3FF" Offset="0" />
+        <GradientStop Color="#004DE3FF" Offset="0.68" />
+    </RadialGradientBrush>
+
+    <SolidColorBrush x:Key="TextPrimary" Color="#E8F3FF" />
+    <SolidColorBrush x:Key="TextTitle" Color="#F6FBFF" />
+    <SolidColorBrush x:Key="TextMuted" Color="#A3B7CC" />
+    <SolidColorBrush x:Key="TextFaint" Color="#7489A1" />
+    <SolidColorBrush x:Key="AccentOrange" Color="#66D4FF" />
+    <SolidColorBrush x:Key="AccentRose" Color="#5B8CFF" />
+    <SolidColorBrush x:Key="AccentCyan" Color="#66D4FF" />
+    <SolidColorBrush x:Key="AccentBlue" Color="#4E8CFF" />
+    <SolidColorBrush x:Key="SystemBlue" Color="#6FCBFF" />
+    <SolidColorBrush x:Key="NormalGreen" Color="#6FE4AE" />
+    <SolidColorBrush x:Key="Danger" Color="#FF7288" />
+    <SolidColorBrush x:Key="Warning" Color="#F6C96B" />
+    <SolidColorBrush x:Key="Healthy" Color="#6FE4AE" />
+    <SolidColorBrush x:Key="ButtonTextDark" Color="#04101E" />
+
+    <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#7BE0FF" Offset="0" />
+        <GradientStop Color="#4E8CFF" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="AccentGradientHover" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#9AEAFF" Offset="0" />
+        <GradientStop Color="#6AA2FF" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DangerGradient" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#3A1B2A" Offset="0" />
+        <GradientStop Color="#1A1020" Offset="1" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="Panel" Color="#B80A1525" />
+    <SolidColorBrush x:Key="PanelStrong" Color="#E80B1727" />
+    <SolidColorBrush x:Key="PanelSoft" Color="#8A081321" />
+    <SolidColorBrush x:Key="PanelHover" Color="#14D8F3FF" />
+    <SolidColorBrush x:Key="StrokeSoft" Color="#16D8F3FF" />
+    <SolidColorBrush x:Key="Stroke" Color="#22D8F3FF" />
+    <SolidColorBrush x:Key="StrokeStrong" Color="#3FD8F3FF" />
+    <SolidColorBrush x:Key="BadgeBg" Color="#14D8F3FF" />
+    <SolidColorBrush x:Key="Divider" Color="#14D8F3FF" />
+    <SolidColorBrush x:Key="Track" Color="#16D8F3FF" />
+    <SolidColorBrush x:Key="TrackFill" Color="#2ED8F3FF" />
+
+    <LinearGradientBrush x:Key="MapSystem" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#8CE6FF" Offset="0" />
+        <GradientStop Color="#4E8CFF" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="MapData" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#2E6CB8" Offset="0" />
+        <GradientStop Color="#234C86" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="MapHidden" Color="#20324A" />
+    <SolidColorBrush x:Key="MapFree" Color="#0E1B2C" />
+    <SolidColorBrush x:Key="MapText" Color="#F6FBFF" />
+    <SolidColorBrush x:Key="MapTextMuted" Color="#C4D9EC" />
+
+    <DropShadowEffect x:Key="CardShadow" BlurRadius="34" ShadowDepth="0" Opacity="0.38" Color="#000000" />
+</ResourceDictionary>

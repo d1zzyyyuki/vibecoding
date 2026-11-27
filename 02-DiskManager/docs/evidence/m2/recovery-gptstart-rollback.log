@@ -1,0 +1,3 @@
+engine-rollback journal=...\DiskManager\out\journal\recovery.journal
+success=True exit=0 message=rolled back
+journal_phase=RolledBack progress=3238002688 dataOffset=3238002688 dataSize=4294967296 growth=1073741824 newDataStart=4311744512
