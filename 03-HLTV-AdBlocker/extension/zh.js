@@ -22,6 +22,10 @@
         "Spirit": "绿龙",
         "Falcons": "猎鹰",
         "FaZe": "银河战舰",
+        "Lynn Vision": "LVG",
+        "BETBOOM": "BB",
+        "BetBoom": "BB",
+        "BetBoom Team": "BB",
         "Astralis": "A队",
         "FURIA": "黑豹",
         "MOUZ": "老鼠",
@@ -36,6 +40,9 @@
         "zont1x": "宗主",
         "z4kr": "三叶",
         "c4llm3su3": "三叶",
+        "kyousuke": "京介",
+        "sunpayus": "太阳神",
+        "chopper": "大超",
         "s1mple": "森破",
         "m0nesy": "小孩",
         "niko": "尼公子",
@@ -54,6 +61,35 @@
         "fallen": "教父",
         "hunter-": "表哥"
     };
+
+    // 这些词是 CS 圈术语、赛事名或无需翻译的队名，机翻前先换成占位符，翻完再还原。
+    var KEEP_TERMS = [
+        ["Lynn Vision", "LVG"],
+        ["BetBoom Team", "BB"],
+        ["BETBOOM", "BB"],
+        ["BetBoom", "BB"],
+        ["Wildcard", "Wildcard"],
+        ["Major", "Major"],
+        ["device", "device"],
+        ["FUT", "FUT"],
+        ["MIBR", "MIBR"],
+        ["IEM", "IEM"],
+        ["ESL", "ESL"],
+        ["BLAST", "BLAST"],
+        ["PGL", "PGL"],
+        ["HLTV", "HLTV"],
+        ["CS2", "CS2"],
+        ["CS:GO", "CS:GO"],
+        ["MVP", "MVP"],
+        ["EVP", "EVP"],
+        ["Top 20", "Top 20"],
+        ["VRS", "VRS"],
+        ["LAN", "LAN"],
+        ["Rating", "Rating"],
+        ["KAST", "KAST"],
+        ["ADR", "ADR"],
+        ["Bo3", "Bo3"]
+    ];
 
     var STYLE_CLASS = "hltv-zh-translation";
     var NICK_CLASS = "hltv-zh-nick";
@@ -100,6 +136,68 @@
             });
         });
         return text;
+    }
+
+    function protectTerms(text) {
+        var values = [];
+        var entries = KEEP_TERMS.slice().sort(function (a, b) {
+            return b[0].length - a[0].length;
+        });
+        entries.forEach(function (entry, index) {
+            var token = "ZXQTERM" + index + "QXZ";
+            var re = new RegExp(
+                "(^|[^A-Za-z0-9_])(" + escapeRegExp(entry[0]) +
+                ")(?=[^A-Za-z0-9_]|$)", "g"
+            );
+            var before = text;
+            text = text.replace(re, function (_m, prefix) {
+                return prefix + token;
+            });
+            if (text !== before) {
+                values.push([token, entry[1]]);
+            }
+        });
+        return { text: text, values: values };
+    }
+
+    function restoreTerms(text, values) {
+        values.forEach(function (entry) {
+            text = text.split(entry[0]).join(entry[1]);
+        });
+        return text;
+    }
+
+    function cleanTranslatedText(text) {
+        text = localizeNames(text);
+        // 占位符没被 API 保留时的兜底；必须先处理“外卡...”再统一“战队”
+        text = text.replace(/外卡战队|外卡球队|外卡队|外卡/g, "Wildcard");
+        text = text.replace(/少校|特锦赛/g, "Major");
+        text = text.replace(/林恩视觉|林恩视野/g, "LVG");
+        text = text.replace(/贝特布姆/gi, "BB");
+        // 机翻偶尔会用错战队称呼；CS 圈统一叫战队
+        text = text.replace(/球队/g, "战队");
+        return text;
+    }
+
+    // 常见的 CS 固定句式和术语，机翻很容易把 plant 译成“工厂”、shot 译成“镜头”。
+    function translateKnownPhrase(text) {
+        var match = text.match(/^(.+?)\s+denies the plant with a crucial shot\.?$/i);
+        if (match) {
+            return match[1].trim() + "用关键一枪阻止了下包";
+        }
+        match = text.match(/^(.+?)\s+denies the plant\.?$/i);
+        if (match) {
+            return match[1].trim() + "阻止了下包";
+        }
+        match = text.match(/^(.+?)\s+defuses the bomb\.?$/i);
+        if (match) {
+            return match[1].trim() + "拆除了炸弹";
+        }
+        match = text.match(/^Frustration for (.+?) after (\d+-\d+) exit\.?$/i);
+        if (match) {
+            return "以" + match[2] + "出局后，" + match[1].trim() + "感到沮丧";
+        }
+        return "";
     }
 
     function decodeEntities(text) {
@@ -158,10 +256,19 @@
             return cache[key];
         }
 
-        var chunks = splitText(source, 450);
+        var known = translateKnownPhrase(source);
+        if (known) {
+            var knownResult = cleanTranslatedText(known);
+            cache[key] = knownResult;
+            saveCache();
+            return knownResult;
+        }
+
         var translated = [];
-        for (var i = 0; i < chunks.length; i++) {
-            var url = API + "?q=" + encodeURIComponent(chunks[i]) +
+        var protectedText = protectTerms(source);
+        var protectedChunks = splitText(protectedText.text, 450);
+        for (var i = 0; i < protectedChunks.length; i++) {
+            var url = API + "?q=" + encodeURIComponent(protectedChunks[i]) +
                 "&langpair=" + encodeURIComponent("en|zh-CN");
             var response = await fetch(url, {
                 method: "GET",
@@ -177,11 +284,13 @@
                 throw new Error("translation unavailable");
             }
             translated.push(decodeEntities(value));
-            if (chunks.length > 1) {
+            if (protectedChunks.length > 1) {
                 await delay(120);
             }
         }
-        var result = localizeNames(translated.join(" ").trim());
+        var result = cleanTranslatedText(
+            restoreTerms(translated.join(" ").trim(), protectedText.values)
+        );
         cache[key] = result;
         saveCache();
         return result;
@@ -300,13 +409,44 @@
 
     function addNick(element, nickname) {
         if (!element || !nickname || element.querySelector("." + NICK_CLASS) ||
-            element.closest("." + STYLE_CLASS)) {
+            element.closest("." + STYLE_CLASS) || element.getAttribute("data-hltv-zh-nick") === "1") {
             return;
         }
+        element.setAttribute("data-hltv-zh-nick", "1");
         var span = document.createElement("span");
         span.className = NICK_CLASS;
         span.textContent = "（" + nickname + "）";
         element.appendChild(span);
+    }
+
+    function decorateNameText() {
+        try {
+            if (!document.body) {
+                return;
+            }
+            var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+            var node = walker.nextNode();
+            while (node) {
+                var text = (node.nodeValue || "").trim();
+                if (text.length > 0 && text.length <= 80) {
+                    var parent = node.parentElement;
+                    if (parent &&
+                        !parent.closest("." + STYLE_CLASS) &&
+                        !parent.closest(".thread-message-text, .comment-body, .comment-content, .comment-text, .comment-message") &&
+                        !parent.closest("a[href*=\"/news/\"], .newstext") &&
+                        !parent.closest("script, style, textarea, input, option")) {
+                        var nickname = findNickname(text, PLAYER_NICKS, true) ||
+                            findNickname(text, TEAM_NICKS, false);
+                        if (nickname) {
+                            addNick(parent, nickname);
+                        }
+                    }
+                }
+                node = walker.nextNode();
+            }
+        } catch (e) {
+            // ignore
+        }
     }
 
     function decorateNames() {
@@ -344,6 +484,7 @@
 
     function scan() {
         decorateNames();
+        decorateNameText();
         scanNews();
         scanComments();
     }

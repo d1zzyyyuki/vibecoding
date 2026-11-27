@@ -2,9 +2,21 @@
 
 在 `hltv.org` 上屏蔽赌博、弹窗、背景和横幅广告，并为新闻、评论、选手和战队补充中文参考。
 
-**版本：v1.1.0 · Microsoft Edge / Chromium · 安装后单文件 CRX**
+**版本：v1.1.1 · Microsoft Edge / Chromium · 安装后单文件 CRX**
 
-[下载 HLTV-AdBlocker.crx](https://github.com/d1zzyyyuki/vibecoding/releases/tag/hltv-adblocker-v1.1.0)
+[下载 HLTV-AdBlocker.crx](https://github.com/d1zzyyyuki/vibecoding/releases/tag/hltv-adblocker-v1.1.1)
+
+## v1.1.1 新增
+
+- 补 `kyousuke（京介）`、`SunPayus（太阳神）`、`chopper（大超）` 等选手别称
+- `Lynn Vision` 统一显示/翻译为 `LVG`；`BETBOOM` 统一为 `BB`
+- `Wildcard` 保持英文，不翻译
+- `Major`、`IEM`、`ESL`、`BLAST`、`CS2`、`MVP` 等 CS 术语保持原文
+- 翻译里的战队称呼统一使用 CS 圈常用说法
+- 战队页面的队员列表也补上选手外号，不再只在比赛数据页生效
+- `FUT`、`MIBR` 等没有通用别称的战队保持原名
+- 修复 `Wildcard` 仍被机翻的问题
+- 修复 `device denies the plant with a crucial shot` 这类 CS 句式被译成“设备/工厂/镜头”的问题，现在输出 `device用关键一枪阻止了下包`
 
 ## v1.1.0 新增
 
@@ -41,7 +53,7 @@ HLTV 的比赛数据和赛程更新很快，但页面会夹带大量赌博/博�
 - CMD 只需要运行一次，之后扩展本体就是一个 **CRX 单文件**。
 - 不需要解压、不需要加载文件夹、没有运行依赖。
 - CMD 只是把扩展 ID 加入 Edge 白名单，可以删除；扩展安装完成后不依赖它。
-- 换电脑时仍然只需要这两个小文件，便携、下载体积约 30 KB + 1 KB。
+- 换电脑时仍然只需要这两个小文件，便携、下载体积约 32 KB + 1 KB。
 
 CMD 会写入一条 Edge 扩展白名单策略（`ExtensionInstallAllowlist`），只针对本扩展 ID；Edge 可能显示“由组织管理”，这是策略生效提示，不是改系统其它设置。不想要策略时，用管理员权限执行 CMD 中提示的 `reg delete` 命令即可。
 
@@ -102,6 +114,15 @@ dist/HLTV-AdBlocker.crx
 首次构建会在 `keys/` 下生成签名私钥，后续构建复用它，保证扩展 ID 稳定。`keys/` 和 `dist/` 都不进仓库。
 
 ## 更新记录
+
+### v1.1.1
+
+- 补充京介、太阳神、大超等选手别称。
+- `Lynn Vision → LVG`、`BETBOOM → BB`；`Wildcard` 保持英文。
+- 保护 `Major` 等 CS 术语和赛事名，翻译里统一使用“战队”称呼。
+- 战队页队员列表也补灰色外号。
+- 翻译中的战队/选手名称统一走同一套词表。
+- 修复 Wildcard 被机翻、CS 固定句式误译（device/plant/crucial shot）的问题。
 
 ### v1.1.0
 
