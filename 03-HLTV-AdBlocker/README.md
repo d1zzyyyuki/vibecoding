@@ -1,10 +1,19 @@
 # HLTV-AdBlocker · 反立即捡钱插件
 
-在 `hltv.org` 上屏蔽赌博、弹窗、背景和横幅广告。
+在 `hltv.org` 上屏蔽赌博、弹窗、背景和横幅广告，并为新闻、评论、选手和战队补充中文参考。
 
-**版本：v1.0.0 · Microsoft Edge / Chromium · 安装后单文件 CRX**
+**版本：v1.1.0 · Microsoft Edge / Chromium · 安装后单文件 CRX**
 
-[下载 HLTV-AdBlocker.crx](https://github.com/d1zzyyyuki/vibecoding/releases/tag/hltv-adblocker-v1.0.0)
+[下载 HLTV-AdBlocker.crx](https://github.com/d1zzyyyuki/vibecoding/releases/tag/hltv-adblocker-v1.1.0)
+
+## v1.1.0 新增
+
+- HLTV 首页 **Today's news** 标题下方增加灰色小字中文参考翻译
+- 新闻和比赛评论下方增加灰色小字 `参考翻译：…`
+- 比赛页、数据表里的选手名后补灰色中文别称，例如 `TeSeS（龙哥）`、`karrigan（大表哥）`
+- 战队名后补灰色中文别称，例如 `Falcons（猎鹰）`、`Spirit（绿龙）`
+- 新闻和评论的翻译文本里，战队/选手名会替换成中文别称；`FUT`、`MIBR` 这种没有通用别称的保持原名
+- 视频播放器上的浮动广告继续过滤
 
 ## 为什么做这个
 
@@ -32,7 +41,7 @@ HLTV 的比赛数据和赛程更新很快，但页面会夹带大量赌博/博�
 - CMD 只需要运行一次，之后扩展本体就是一个 **CRX 单文件**。
 - 不需要解压、不需要加载文件夹、没有运行依赖。
 - CMD 只是把扩展 ID 加入 Edge 白名单，可以删除；扩展安装完成后不依赖它。
-- 换电脑时仍然只需要这两个小文件，便携、下载体积约 26 KB + 1 KB。
+- 换电脑时仍然只需要这两个小文件，便携、下载体积约 30 KB + 1 KB。
 
 CMD 会写入一条 Edge 扩展白名单策略（`ExtensionInstallAllowlist`），只针对本扩展 ID；Edge 可能显示“由组织管理”，这是策略生效提示，不是改系统其它设置。不想要策略时，用管理员权限执行 CMD 中提示的 `reg delete` 命令即可。
 
@@ -61,15 +70,18 @@ CMD 会写入一条 Edge 扩展白名单策略（`ExtensionInstallAllowlist`）�
 - Manifest V3
 - `declarativeNetRequest` 静态规则拦截广告网络（规则见 `extension/rules.json`）
 - Content Script 在 HLTV 页面清理残留的广告容器和背景广告
-- 不注入远程代码，不收集数据，不联网回传
+- `zh.js` 负责新闻/评论参考翻译、选手和战队灰色别称
+- 翻译通过 MyMemory 的公开接口，只发送需要翻译的标题/评论文本；不发送 cookie、账号或浏览历史，翻译结果缓存在本机
+- 不注入远程代码，不收集数据，不联网回传（翻译请求除外）
 - 所有广告域名规则只在 HLTV 页面发起的第三方请求上生效（`initiatorDomains: hltv.org`）
 
 ## 目录
 
 ```text
-extension/           扩展源码（manifest、规则、content script、图标）
+extension/           扩展源码（manifest、规则、content script、中文辅助、图标）
 assets/              图标母版
 tools/               图标生成、CRX 打包脚本
+install/             Edge 白名单一次性修复脚本
 dist/                构建产物（HLTV-AdBlocker.crx，不提交 Git）
 ```
 
@@ -89,7 +101,17 @@ dist/HLTV-AdBlocker.crx
 
 首次构建会在 `keys/` 下生成签名私钥，后续构建复用它，保证扩展 ID 稳定。`keys/` 和 `dist/` 都不进仓库。
 
-## 更新记录（v1.0.0 整理）
+## 更新记录
+
+### v1.1.0
+
+- 新闻标题、新闻评论和比赛评论增加中文参考翻译。
+- 选手和战队增加灰色中文别称；翻译文本里的队名/选手名同步替换。
+- 保留 v1.0.0 的全部广告过滤和 Edge 安装方式。
+- 视频悬浮广告过滤继续保留。
+- 扩展简介已更新为“广告过滤 + 中文化”，保持精简。
+
+### v1.0.0 整理
 
 - 精简扩展简介文案。
 - 补强视频播放器浮动广告、`/out2/` 广告链接容器、Betway / 九游 / 雷火 / 熊猫 / 开云 / Stake 等赞助位的过滤。
@@ -99,6 +121,8 @@ dist/HLTV-AdBlocker.crx
 ## 已知限制
 
 - 本地 CRX 安装需要 Edge 开发人员模式，这是 Edge 的限制，不是插件需要联网安装
+- 参考翻译依赖 MyMemory 网络服务；请求失败时不会显示翻译，稍后刷新即可
+- 机器翻译只作参考，新闻标题和评论里的语气/梗可能不准确
 - HLTV 改版后广告容器类名可能变化，需要更新 `content.css` / `content.js`
 - 第三方直播 iframe 内部的广告不在本插件控制范围内
 - 没有上架 Edge 加载项商店，因此不会自动更新

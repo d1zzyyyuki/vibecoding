@@ -109,3 +109,22 @@ body[data-href],
 body[data-href]::before {
     background-image: none !important;
 }
+
+/* 中文参考翻译 / 选手和战队灰色别称 */
+.hltv-zh-translation {
+    display: block !important;
+    margin-top: 4px !important;
+    color: #98a4b5 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1.45 !important;
+    white-space: normal !important;
+}
+
+.hltv-zh-nick {
+    display: inline !important;
+    margin-left: 2px !important;
+    color: #98a4b5 !important;
+    font-size: 0.85em !important;
+    font-weight: 400 !important;
+}
