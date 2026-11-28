@@ -138,6 +138,9 @@ body[data-href]::before {
     bottom: auto !important;
     z-index: 2147483647 !important;
     color: rgba(160, 170, 185, 0.58) !important;
+    background: rgba(15, 23, 36, 0.52) !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
     font-family: "Segoe UI", Arial, sans-serif !important;
     font-size: 11px !important;
     font-weight: 400 !important;

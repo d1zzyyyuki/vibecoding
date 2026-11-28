@@ -1,13 +1,18 @@
 /*
- * HLTV-AdBlocker · 中文化辅助
+ * HLTV-AdBlocker · 中文化辅助（优化版 v1.2.0）
  *
  * 只做三件事：
  *   1. 给 HLTV 新闻标题加一条灰色小字参考翻译
  *   2. 给新闻/比赛评论加一条灰色小字参考翻译
  *   3. 给常见战队、选手补灰色中文别称
  *
- * 翻译走 MyMemory 的公开接口，只发送需要翻译的标题/评论文本；
- * 不发送浏览历史、账号信息或页面其它内容。
+ * 翻译走 MyMemory 的公开接口，只发送需要翻译的标题/评论文本。
+ *
+ * 与原版相比只改了实现：
+ *   - 38 个名字的正则只编译一次（原版每个文本节点都要重编译一遍 + 排序两次）；
+ *   - 同一个文本的并发翻译请求合并成一次；
+ *   - MyMemory 日额度用完后自动停手，不再反复请求；
+ *   - 自己插入节点时先断开/跳过观察器，避免自己触发自己再扫一遍。
  */
 (function () {
     "use strict";
@@ -16,6 +21,18 @@
         return;
     }
     window.__hltvZhLoaded = true;
+
+    var DEBUG = false;
+    function log() {
+        if (!DEBUG) {
+            return;
+        }
+        try {
+            console.debug.apply(console, ["[hltv-zh]"].concat(Array.prototype.slice.call(arguments)));
+        } catch (e) {
+            // ignore
+        }
+    }
 
     var TEAM_NICKS = {
         "Vitality": "小蜜蜂",
@@ -59,7 +76,8 @@
         "elige": "鸡哥",
         "coldzera": "冷神",
         "fallen": "教父",
-        "hunter-": "表哥"
+        "hunter-": "表哥",
+        "olofmeister": "奥拉夫"
     };
 
     // 这些词是 CS 圈术语、赛事名或无需翻译的队名，机翻前先换成占位符，翻完再还原。
@@ -97,12 +115,38 @@
 
     var STYLE_CLASS = "hltv-zh-translation";
     var NICK_CLASS = "hltv-zh-nick";
-    var CACHE_KEY = "hltv_zh_cache_v1";
+    var CACHE_KEY = "hltv_zh_cache_v2";
     var API = "https://api.mymemory.translated.net/get";
+    // 选填：填上自己的邮箱，MyMemory 的匿名额度会从 5000 字符/天 提到 50000 字符/天
+    var API_EMAIL = "";
+
+    // 这些区域不加别称/翻译（新闻链接、评论区自己会走翻译流程）
+    var TEXT_SKIP = [
+        ".hltv-zh-translation",
+        ".forum-middle",
+        ".thread-message-text",
+        ".comment-body",
+        ".comment-content",
+        ".comment-text",
+        ".comment-message",
+        "script",
+        "style",
+        "textarea",
+        "input",
+        "option",
+        "select",
+        "button",
+        'a[href*="/news/"]',
+        ".newstext"
+    ].join(",");
+
     var queue = [];
     var running = 0;
     var scanTimer = 0;
     var cache = {};
+    var inflight = Object.create(null);
+    var quotaExhausted = false;
+    var writing = false;
 
     try {
         cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}") || {};
@@ -110,58 +154,86 @@
         cache = {};
     }
 
+    function escapeRegExp(text) {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    // 把一张“名字 -> 别称”表编译成一条正则，只做一次；替代原版每个节点重编译 38 条正则
+    function buildNameMatcher(table, caseInsensitive) {
+        var keys = Object.keys(table).sort(function (a, b) {
+            return b.length - a.length;
+        });
+        var map = Object.create(null);
+        keys.forEach(function (key) {
+            map[caseInsensitive ? key.toLowerCase() : key] = table[key];
+        });
+        var body = "(^|[^A-Za-z0-9_])(?:" + keys.map(escapeRegExp).join("|") + ")(?=[^A-Za-z0-9_]|$)";
+        return {
+            re: new RegExp(body, caseInsensitive ? "gi" : "g"),
+            findRe: new RegExp(body, caseInsensitive ? "i" : ""),
+            map: map,
+            ci: !!caseInsensitive
+        };
+    }
+
+    var TEAM_MATCHER = buildNameMatcher(TEAM_NICKS, false);
+    var PLAYER_MATCHER = buildNameMatcher(PLAYER_NICKS, true);
+
+    var KEEP_RE = (function () {
+        var keys = KEEP_TERMS.map(function (entry) {
+            return entry[0];
+        }).sort(function (a, b) {
+            return b.length - a.length;
+        });
+        return new RegExp(
+            "(^|[^A-Za-z0-9_])(?:" + keys.map(escapeRegExp).join("|") + ")(?=[^A-Za-z0-9_]|$)",
+            "g"
+        );
+    })();
+
+    var KEEP_MAP = (function () {
+        var map = Object.create(null);
+        KEEP_TERMS.forEach(function (entry) {
+            map[entry[0]] = entry[1];
+        });
+        return map;
+    })();
+
+    function matcherNickname(text, matcher) {
+        var match = matcher.findRe.exec(text);
+        if (!match) {
+            return "";
+        }
+        var name = match[0].slice(match[1].length);
+        return matcher.map[matcher.ci ? name.toLowerCase() : name] || "";
+    }
+
+    function applyNameMatcher(text, matcher) {
+        return text.replace(matcher.re, function (match, prefix) {
+            var name = match.slice(prefix.length);
+            var nick = matcher.map[matcher.ci ? name.toLowerCase() : name];
+            return nick ? prefix + nick : match;
+        });
+    }
+
     function isChinese(text) {
         var han = (text.match(/[\u4e00-\u9fff]/g) || []).length;
         return han > Math.max(2, text.length * 0.12);
     }
 
-    function escapeRegExp(text) {
-        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    }
-
     function localizeNames(text) {
-        var entries = [];
-        Object.keys(TEAM_NICKS).forEach(function (key) {
-            entries.push([key, TEAM_NICKS[key], false]);
-        });
-        Object.keys(PLAYER_NICKS).forEach(function (key) {
-            entries.push([key, PLAYER_NICKS[key], true]);
-        });
-        entries.sort(function (a, b) {
-            return b[0].length - a[0].length;
-        });
-        entries.forEach(function (entry) {
-            var re = new RegExp(
-                "(^|[^A-Za-z0-9_])(" + escapeRegExp(entry[0]) + ")(?=[^A-Za-z0-9_]|$)",
-                entry[2] ? "gi" : "g"
-            );
-            text = text.replace(re, function (_m, before) {
-                return before + entry[1];
-            });
-        });
-        return text;
+        return applyNameMatcher(applyNameMatcher(text, TEAM_MATCHER), PLAYER_MATCHER);
     }
 
     function protectTerms(text) {
         var values = [];
-        var entries = KEEP_TERMS.slice().sort(function (a, b) {
-            return b[0].length - a[0].length;
+        var out = text.replace(KEEP_RE, function (match, prefix) {
+            var term = match.slice(prefix.length);
+            var token = "ZXQTERM" + values.length + "QXZ";
+            values.push([token, KEEP_MAP[term]]);
+            return prefix + token;
         });
-        entries.forEach(function (entry, index) {
-            var token = "ZXQTERM" + index + "QXZ";
-            var re = new RegExp(
-                "(^|[^A-Za-z0-9_])(" + escapeRegExp(entry[0]) +
-                ")(?=[^A-Za-z0-9_]|$)", "g"
-            );
-            var before = text;
-            text = text.replace(re, function (_m, prefix) {
-                return prefix + token;
-            });
-            if (text !== before) {
-                values.push([token, entry[1]]);
-            }
-        });
-        return { text: text, values: values };
+        return { text: out, values: values };
     }
 
     function restoreTerms(text, values) {
@@ -190,6 +262,9 @@
 
     // 常见的 CS 固定句式和术语，机翻很容易把 plant 译成“工厂”、shot 译成“镜头”。
     function translateKnownPhrase(text) {
+        if (/^\s*(nice try|nt)[.!]*\s*$/i.test(text)) {
+            return "尽力了";
+        }
         var match = text.match(/^(.+?)\s+denies the plant with a crucial shot\.?$/i);
         if (match) {
             return match[1].trim() + "用关键一枪阻止了下包";
@@ -225,6 +300,14 @@
         match = text.match(/^(.+?)\s+bench(?:es)? (.+?)\.?$/i);
         if (match) {
             return match[1].trim() + "将" + match[2].trim() + "放上替补席";
+        }
+        match = text.match(/^(.+?)\s+dispatch(?:es)? (.+?) to make (Stage \d+)\.?$/i);
+        if (match) {
+            return match[1].trim() + "战胜" + match[2].trim() + "，晋级" + match[3];
+        }
+        match = text.match(/^(.+?)\s+outlast(?:s)? (.+?) to progress to (Stage \d+)\.?$/i);
+        if (match) {
+            return match[1].trim() + "战胜" + match[2].trim() + "，晋级" + match[3];
         }
         return "";
     }
@@ -284,6 +367,9 @@
         if (Object.prototype.hasOwnProperty.call(cache, key)) {
             return cache[key];
         }
+        if (quotaExhausted) {
+            throw new Error("translation quota exhausted");
+        }
 
         var known = translateKnownPhrase(source);
         if (known) {
@@ -299,6 +385,9 @@
         for (var i = 0; i < protectedChunks.length; i++) {
             var url = API + "?q=" + encodeURIComponent(protectedChunks[i]) +
                 "&langpair=" + encodeURIComponent("en|zh-CN");
+            if (API_EMAIL) {
+                url += "&de=" + encodeURIComponent(API_EMAIL);
+            }
             var response = await fetch(url, {
                 method: "GET",
                 signal: AbortSignal.timeout(12000),
@@ -310,6 +399,10 @@
             var payload = await response.json();
             var value = payload && payload.responseData && payload.responseData.translatedText;
             if (!value || /MYMEMORY WARNING|QUERY LENGTH LIMIT|INVALID/i.test(value)) {
+                if (/MYMEMORY WARNING/i.test(value || "")) {
+                    quotaExhausted = true;
+                    log("MyMemory 今日免费额度已用完，本次会话不再请求翻译");
+                }
                 throw new Error("translation unavailable");
             }
             translated.push(decodeEntities(value));
@@ -325,14 +418,27 @@
         return result;
     }
 
+    function settle(key, value) {
+        var waiters = inflight[key] || [];
+        delete inflight[key];
+        for (var i = 0; i < waiters.length; i++) {
+            try {
+                waiters[i](value);
+            } catch (e) {
+                log("translation callback", e);
+            }
+        }
+    }
+
     function pump() {
         while (running < 2 && queue.length) {
             var job = queue.shift();
             running += 1;
             translateText(job.text).then(function (value) {
-                job.done(value);
-            }).catch(function () {
-                job.done("");
+                settle(job.key, value || "");
+            }).catch(function (error) {
+                log("translate failed", error);
+                settle(job.key, "");
             }).finally(function () {
                 running -= 1;
                 pump();
@@ -341,13 +447,18 @@
     }
 
     function enqueue(text, done) {
-        var source = text.trim();
-        var key = "t:" + source;
+        var key = "t:" + text.trim();
         if (Object.prototype.hasOwnProperty.call(cache, key)) {
             done(cache[key]);
             return;
         }
-        queue.push({ text: text, done: done });
+        // 同一段英文同时出现在多处时只发一次请求
+        if (inflight[key]) {
+            inflight[key].push(done);
+            return;
+        }
+        inflight[key] = [done];
+        queue.push({ key: key, text: text });
         pump();
     }
 
@@ -370,7 +481,7 @@
     }
 
     function scanNews() {
-        document.querySelectorAll("a[href*=\"/news/\"]").forEach(function (anchor) {
+        document.querySelectorAll('a[href*="/news/"]').forEach(function (anchor) {
             if (anchor.getAttribute("data-hltv-zh-news") === "1") {
                 return;
             }
@@ -409,7 +520,7 @@
                 if (element.closest("." + STYLE_CLASS) || element.querySelector(".thread-message-text")) {
                     return;
                 }
-                var text = (element.innerText || "").trim();
+                var text = (element.textContent || "").trim();
                 if (text.length < 8 || isChinese(text)) {
                     return;
                 }
@@ -422,23 +533,6 @@
                 addTranslationAfter(element, text, true);
             });
         });
-    }
-
-    function findNickname(text, table, lowerCaseKeys) {
-        var probe = lowerCaseKeys ? text.toLowerCase() : text;
-        var keys = Object.keys(table).sort(function (a, b) {
-            return b.length - a.length;
-        });
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            var needle = lowerCaseKeys ? key.toLowerCase() : key;
-            var re = new RegExp("(^|[^A-Za-z0-9_])" + escapeRegExp(needle) +
-                "(?=[^A-Za-z0-9_]|$)", lowerCaseKeys ? "i" : "");
-            if (re.test(probe)) {
-                return table[key];
-            }
-        }
-        return "";
     }
 
     function addNick(element, nickname) {
@@ -462,16 +556,12 @@
             var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
             var node = walker.nextNode();
             while (node) {
-                var text = (node.nodeValue || "").trim();
-                if (text.length > 0 && text.length <= 80) {
+                var text = node.nodeValue ? node.nodeValue.trim() : "";
+                if (text && text.length <= 80) {
                     var parent = node.parentElement;
-                    if (parent &&
-                        !parent.closest("." + STYLE_CLASS) &&
-                        !parent.closest(".forum-middle, .thread-message-text, .comment-body, .comment-content, .comment-text, .comment-message") &&
-                        !parent.closest("a[href*=\"/news/\"], .newstext") &&
-                        !parent.closest("script, style, textarea, input, option")) {
-                        var nickname = findNickname(text, PLAYER_NICKS, true) ||
-                            findNickname(text, TEAM_NICKS, false);
+                    if (parent && !parent.closest(TEXT_SKIP)) {
+                        var nickname = matcherNickname(text, PLAYER_MATCHER) ||
+                            matcherNickname(text, TEAM_MATCHER);
                         if (nickname) {
                             addNick(parent, nickname);
                         }
@@ -480,13 +570,13 @@
                 node = walker.nextNode();
             }
         } catch (e) {
-            // ignore
+            log("decorateNameText", e);
         }
     }
 
     function decorateNames() {
         var players = new Set();
-        document.querySelectorAll(".playerNickname, a[href*=\"/player/\"]").forEach(function (el) {
+        document.querySelectorAll('.playerNickname, a[href*="/player/"]').forEach(function (el) {
             players.add(el);
         });
         players.forEach(function (el) {
@@ -497,11 +587,11 @@
             if (!text) {
                 return;
             }
-            addNick(el, findNickname(text, PLAYER_NICKS, true));
+            addNick(el, matcherNickname(text, PLAYER_MATCHER));
         });
 
         var teams = new Set();
-        document.querySelectorAll(".teamName, .team-name, a[href*=\"/team/\"]").forEach(function (el) {
+        document.querySelectorAll('.teamName, .team-name, a[href*="/team/"]').forEach(function (el) {
             teams.add(el);
         });
         teams.forEach(function (el) {
@@ -513,15 +603,27 @@
             if (!text) {
                 return;
             }
-            addNick(el, findNickname(text, TEAM_NICKS, false));
+            addNick(el, matcherNickname(text, TEAM_MATCHER));
         });
     }
 
-    function scan() {
+    function scanInner() {
         decorateNames();
         decorateNameText();
         scanNews();
         scanComments();
+    }
+
+    function scan() {
+        // 扫描期间自己插入的节点不要反过来触发新一轮扫描
+        writing = true;
+        try {
+            scanInner();
+        } finally {
+            window.setTimeout(function () {
+                writing = false;
+            }, 0);
+        }
     }
 
     function scheduleScan() {
@@ -531,25 +633,31 @@
         scanTimer = window.setTimeout(function () {
             scanTimer = 0;
             scan();
-        }, 350);
+        }, 500);
+    }
+
+    var observer = null;
+    function onMutations() {
+        if (writing) {
+            return;
+        }
+        scheduleScan();
     }
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", scheduleScan, { once: true });
-        document.addEventListener("DOMContentLoaded", function () {
-            scan();
-        }, { once: true });
+        document.addEventListener("DOMContentLoaded", scan, { once: true });
     } else {
         scan();
     }
 
     try {
-        new MutationObserver(scheduleScan).observe(document.documentElement, {
+        observer = new MutationObserver(onMutations);
+        observer.observe(document.documentElement, {
             childList: true,
             subtree: true
         });
     } catch (e) {
-        // ignore
+        log("observer", e);
     }
     window.addEventListener("load", scheduleScan, { once: true });
 

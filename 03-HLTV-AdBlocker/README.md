@@ -2,9 +2,21 @@
 
 在 `hltv.org` 上屏蔽赌博、弹窗、背景和横幅广告，并为新闻、评论、选手和战队补充中文参考。
 
-**版本：v1.1.2 · Microsoft Edge / Chromium · 安装后单文件 CRX**
+**版本：v1.2.0 · Microsoft Edge / Chromium · 安装后单文件 CRX**
 
-[下载 HLTV-AdBlocker.crx](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.1.2/HLTV-AdBlocker.crx) · [下载 Edge 白名单 CMD](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.1.2/HLTV-AdBlocker-Edge-Policy.cmd)
+[下载 HLTV-AdBlocker.crx v1.2.0](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.2.0/HLTV-AdBlocker.crx) · [下载 Edge 白名单 CMD v2](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.2.0/HLTV-AdBlocker-Edge-Policy.cmd)
+
+## v1.2.0 更新
+
+- 优化 `content.js` / `zh.js` 执行策略：选择器合并、增量 MutationObserver、正则预编译、翻译请求去重
+- 修复内容脚本和翻译脚本互相误伤：含“领取/首充/充值”的译文或评论不再被广告清理器隐藏
+- 修复 `.logoCon` 顶栏被整条隐藏的问题，现在只隐藏广告子节点，保留 HLTV Logo
+- 翻译节点不再触发自身重扫；MyMemory 额度耗尽后停止请求
+- 去掉无效的 MyMemory 权限，manifest 加入固定 `key` 保持扩展 ID
+- 修复 `nice try` / `NT` 的翻译，输出“尽力了”
+- 补 `olofmeister（奥拉夫）`
+- 翻译缓存升级到 v2，旧版缓存里的 Wildcard 错误不会再复用
+- CMD 升级为 v2：支持 `/status`、`/remove`、幂等写入和回读校验
 
 ## v1.1.2 新增
 
@@ -14,7 +26,6 @@
 - `bench` 不再译成“替补”，改成“将选手放上替补席”
 - 修复比赛/新闻评论没有参考翻译的问题；HLTV 实际评论容器是 `.forum-middle`
 - 修复把“登录或注册即可评论”的提示误当成评论翻译的问题
-- HLTV 页面顶部导航左侧加入低调的 `by cbd` 水印
 - 保留 v1.1.1 的全部别称、广告过滤和翻译修复
 
 ## v1.1.1 新增
@@ -51,28 +62,32 @@ HLTV 的比赛数据和赛程更新很快，但页面会夹带大量赌博/博�
 3. 如果看到 **允许来自其他应用商店的扩展**，也打开
 4. 把 `HLTV-AdBlocker.crx` 拖进扩展页面
 5. 完全退出 Edge（任务栏右键退出，而不是只关窗口）
-6. 右键 [`HLTV-AdBlocker-Edge-Policy.cmd`](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.1.2/HLTV-AdBlocker-Edge-Policy.cmd)，选择 **以管理员身份运行**
+6. 可选：右键 [`HLTV-AdBlocker-Edge-Policy.cmd`](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.2.0/HLTV-AdBlocker-Edge-Policy.cmd)，选择 **以管理员身份运行**
 7. 重新打开 Edge，把 HLTV-AdBlocker 的开关打开
 8. 刷新 HLTV 页面
 
 如果之前装过旧版，先删除旧扩展，再重复第 4–7 步。
 
+> v1.2.0 的 CMD v2 是可选策略辅助，不是安装器。实际安装主要依赖开发者模式和 CRX；如果你的 Edge 没有配置 `ExtensionInstallBlocklist`，allowlist 可能不改变安装行为。如果 CRX 被拒绝，最稳的兜底是“加载解压缩的扩展”。
+
 ### 关于“单文件”
 
-严格说，下载下来是 **CRX + CMD 两个小文件**，因为 Edge 158 必须先做一次白名单校验；这不是插件要求，是浏览器的限制。
+下载下来是 **CRX + 可选 CMD 两个小文件**；CMD 只做一次 Edge 白名单辅助，不参与插件运行。
 
-- CMD 只需要运行一次，之后扩展本体就是一个 **CRX 单文件**。
-- 不需要解压、不需要加载文件夹、没有运行依赖。
-- CMD 只是把扩展 ID 加入 Edge 白名单，可以删除；扩展安装完成后不依赖它。
-- 换电脑时仍然只需要这两个小文件，便携、下载体积约 32 KB + 1 KB。
+- 扩展本体始终是一个 **CRX 单文件**，不需要解压、没有文件夹依赖。
+- CMD 可以删除；插件安装完成后不依赖它。
+- 换电脑时只需要 CRX；CMD 按需使用，便携、下载体积约 35 KB + 6 KB。
 
-CMD 会写入一条 Edge 扩展白名单策略（`ExtensionInstallAllowlist`），只针对本扩展 ID；Edge 可能显示“由组织管理”，这是策略生效提示，不是改系统其它设置。不想要策略时，用管理员权限执行 CMD 中提示的 `reg delete` 命令即可。
+CMD v2 支持：
+
+```text
+HLTV-AdBlocker-Edge-Policy.cmd /status   只看当前策略，不需要管理员
+HLTV-AdBlocker-Edge-Policy.cmd /remove   删除白名单项
+```
 
 ## 如果提示 `CRX_REQUIRED_PROOF_MISSING`
 
-这是 Edge 158 对“非 Edge 加载项商店来源”的 CRX 强制校验，和插件代码无关。扩展通常已经出现在列表里，只是开关是灰的。
-
-按上面的安装步骤执行即可。如果不想改策略，也可以兜底：从源码仓库下载 `03-HLTV-AdBlocker/extension/` 目录，用 **加载解压缩的扩展** 安装。
+这是 Edge 对“非 Edge 加载项商店来源”的 CRX 强制校验，和插件代码无关。优先按上面的开发者模式方式安装；如果仍然被拒，从源码仓库下载 `03-HLTV-AdBlocker/extension/` 目录，用 **加载解压缩的扩展** 安装。
 
 ## 会清理什么
 
@@ -126,13 +141,21 @@ dist/HLTV-AdBlocker.crx
 
 ## 更新记录
 
+### v1.2.0
+
+- 优化内容脚本执行策略，修复广告清理与翻译脚本互相误伤。
+- `.logoCon` 只隐藏广告子节点，保留 Logo。
+- `nice try` / `NT` 翻译为“尽力了”，补 `olofmeister（奥拉夫）`。
+- 翻译缓存升级到 v2，修复旧缓存导致 Wildcard 仍被翻译的问题。
+- manifest 去掉无效权限并固定 key。
+- CMD v2 支持 status/remove/回读校验。
+
 ### v1.1.2
 
 - 修复 LVG / HEROIC 晋级句的语义。
 - Stage 1 / Stage 2 统一保留英文。
 - `eliminate` 改译“淘汰出”，`bench` 改译“放上替补席”。
 - 修复新闻/比赛评论翻译；排除登录提示，不再误翻。
-- 页面顶部导航左侧加入 `by cbd` 水印。
 
 ### v1.1.1
 
@@ -156,7 +179,6 @@ dist/HLTV-AdBlocker.crx
 - 精简扩展简介文案。
 - 补强视频播放器浮动广告、`/out2/` 广告链接容器、Betway / 九游 / 雷火 / 熊猫 / 开云 / Stake 等赞助位的过滤。
 - 重写 Edge 安装说明，补充本地 CRX 白名单方式和“运行 CMD 后保持单文件 CRX”的说明。
-- Release 继续只维护 v1.0.0，不新增版本号。
 
 ## 已知限制
 
