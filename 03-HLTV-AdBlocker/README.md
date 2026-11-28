@@ -2,9 +2,17 @@
 
 在 `hltv.org` 上屏蔽赌博、弹窗、背景和横幅广告，并为新闻、评论、选手和战队补充中文参考。
 
-**版本：v1.2.0 · Microsoft Edge / Chromium · 安装后单文件 CRX**
+**版本：v1.2.1 · Microsoft Edge / Chromium · 安装后单文件 CRX**
 
-[下载 HLTV-AdBlocker.crx v1.2.0](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.2.0/HLTV-AdBlocker.crx) · [下载 Edge 白名单 CMD v2](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.2.0/HLTV-AdBlocker-Edge-Policy.cmd)
+[下载 HLTV-AdBlocker.crx v1.2.1](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.2.1/HLTV-AdBlocker.crx) · [下载 Edge 白名单 CMD v2](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.2.1/HLTV-AdBlocker-Edge-Policy.cmd)
+
+## v1.2.1 工程化更新
+
+- 增加 GitHub Actions：01 Python 测试、02 .NET 8 测试、03 Edge 无头 fixture 测试
+- 03 增加可重复的扩展测试，覆盖广告清理、Logo、评论翻译、登录提示、赔率区、词表和新闻句式
+- 根目录补 MIT LICENSE，并保留各项目目录内的许可证
+- 新增开发日志、AI 使用说明和 01 异常处理审计报告
+- 01 固定依赖版本，02 修正改名残留文案并把 PE/ADK 构建阻塞移入 TODO
 
 ## v1.2.0 更新
 
@@ -62,13 +70,13 @@ HLTV 的比赛数据和赛程更新很快，但页面会夹带大量赌博/博�
 3. 如果看到 **允许来自其他应用商店的扩展**，也打开
 4. 把 `HLTV-AdBlocker.crx` 拖进扩展页面
 5. 完全退出 Edge（任务栏右键退出，而不是只关窗口）
-6. 可选：右键 [`HLTV-AdBlocker-Edge-Policy.cmd`](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.2.0/HLTV-AdBlocker-Edge-Policy.cmd)，选择 **以管理员身份运行**
+6. 可选：右键 [`HLTV-AdBlocker-Edge-Policy.cmd`](https://github.com/d1zzyyyuki/vibecoding/releases/download/hltv-adblocker-v1.2.1/HLTV-AdBlocker-Edge-Policy.cmd)，选择 **以管理员身份运行**
 7. 重新打开 Edge，把 HLTV-AdBlocker 的开关打开
 8. 刷新 HLTV 页面
 
 如果之前装过旧版，先删除旧扩展，再重复第 4–7 步。
 
-> v1.2.0 的 CMD v2 是可选策略辅助，不是安装器。实际安装主要依赖开发者模式和 CRX；如果你的 Edge 没有配置 `ExtensionInstallBlocklist`，allowlist 可能不改变安装行为。如果 CRX 被拒绝，最稳的兜底是“加载解压缩的扩展”。
+> CMD v2 是可选策略辅助，不是安装器。实际安装主要依赖开发者模式和 CRX；如果你的 Edge 没有配置 `ExtensionInstallBlocklist`，allowlist 可能不改变安装行为。如果 CRX 被拒绝，最稳的兜底是“加载解压缩的扩展”。
 
 ### 关于“单文件”
 
@@ -140,6 +148,11 @@ dist/HLTV-AdBlocker.crx
 首次构建会在 `keys/` 下生成签名私钥，后续构建复用它，保证扩展 ID 稳定。`keys/` 和 `dist/` 都不进仓库。
 
 ## 更新记录
+
+### v1.2.1
+
+- CI、根 LICENSE、开发日志、03 fixture 测试。
+- 01 依赖固定版本，02 文档残留清理。
 
 ### v1.2.0
 

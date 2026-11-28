@@ -10,7 +10,7 @@
 
 
 
-DiskManager 是 DiskManager 的冷色重设计版本：深蓝玻璃界面、芙宁娜背景、蓝色齿轮图标；保留按物理磁盘展示分区、读写测速、在线分区搬移、分区操作和 C 盘扩容规划。
+DiskManager 是一个冷色重设计的磁盘管理器：深蓝玻璃界面、芙宁娜背景、蓝色齿轮图标；保留按物理磁盘展示分区、读写测速、在线分区搬移、分区操作和 C 盘扩容规划。
 
 
 
@@ -88,7 +88,7 @@ DiskManager 是 DiskManager 的冷色重设计版本：深蓝玻璃界面、芙�
 
 | 离线多分区右移执行器 `DiskManagerOffline run` | 已编码；12 GB VHD 上完成收缩/右移/GPT/扩 C，payload 哈希一致 |
 
-| PE 镜像构建脚本 `tools/pe/build-pe.ps1` | 已写；ADK 安装被 Windows Installer 1618 阻挡，待重启后构建 |
+| PE 镜像构建脚本 `tools/pe/build-pe.ps1` | 已写；构建步骤待完成，见 [TODO](docs/TODO.md) |
 
 | 在线搬移/扩卷引擎 | 代码保留，曾在 VHD 上完成破坏性验证；本轮未重跑 |
 
@@ -197,7 +197,7 @@ dist/                    DiskManager.exe
 
 - C 盘扩容 UI 生成计划后会把同一 job 复制到 `%ProgramData%\DiskManager\pe\job.json`；PE 构建脚本会自动带入，但仍需要 PE 镜像/重启执行。
 
-- PE 镜像未构建：ADK 安装在本机被 Windows Installer 1618 阻挡（需要重启后再试）；`tools/pe/build-pe.ps1` 已写好；离线执行证据见 [VHD 实测](docs/evidence/offline-run-2026-11-25.md)。
+- PE 镜像未构建，构建步骤待完成，见 [TODO](docs/TODO.md)；`tools/pe/build-pe.ps1` 已写好；离线执行证据见 [VHD 实测](docs/evidence/offline-run-2026-11-25.md)。
 
 - 离线执行器默认只允许虚拟磁盘；真实盘必须显式 `--allow-real`，且当前尚未授权。
 

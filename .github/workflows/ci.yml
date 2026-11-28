@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  project01:
+    name: 01 ArchivePasswordFinder
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Python dependencies
+        run: python -m pip install -r 01-ArchivePasswordFinder/requirements.txt
+      - name: Download hashcat runtime
+        continue-on-error: true
+        run: python 01-ArchivePasswordFinder/tools/get_hashcat.py
+      - name: Install MinGW for mock CUDA driver
+        continue-on-error: true
+        run: choco install mingw -y --no-progress
+      - name: Put MinGW on PATH
+        shell: pwsh
+        run: '"C:\ProgramData\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8'
+      - name: Run Python tests
+        working-directory: 01-ArchivePasswordFinder
+        run: |
+          python tests/test_smoke.py
+          python tests/test_capability.py
+          python tests/test_cuda.py
+          python tests/test_hashcat.py
+
+  project02:
+    name: 02 DiskManager
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Build test project
+        run: dotnet build 02-DiskManager/tests/DiskManager.Tests/DiskManager.Tests.csproj -c Release
+      - name: Run checks
+        shell: pwsh
+        run: |
+          $exe = "02-DiskManager/tests/DiskManager.Tests/bin/Release/net8.0/DiskManager.Tests.exe"
+          & $exe
+          exit $LASTEXITCODE
+
+  project03:
+    name: 03 HLTV-AdBlocker
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Check syntax and run Edge fixture
+        run: node 03-HLTV-AdBlocker/tests/test_extension.mjs
