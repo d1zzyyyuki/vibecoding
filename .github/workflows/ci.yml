@@ -68,3 +68,15 @@ jobs:
           node-version: "24"
       - name: Check syntax and run Edge fixture
         run: node 03-HLTV-AdBlocker/tests/test_extension.mjs
+
+  project04:
+    name: 04 DSH-SessionKiller
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build single-file CMD
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File 04-DSH-SessionKiller/tools/build-cmd.ps1
+      - name: Run fixture tests
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File 04-DSH-SessionKiller/tests/run-tests.ps1

@@ -7,6 +7,7 @@
 - 01：本机跑过 smoke/capability/cuda/hashcat 测试；CUDA 路径在无 N 卡机器上通过 mock 驱动测试。
 - 02：38 项检查在仓库源码上跑过；真实磁盘写入未授权，VHD 测试证据留在 `docs/evidence/`。
 - 03：Edge 无头 fixture、MyMemory 真实接口和 HLTV 结构片段验证过；未在真实 HLTV 页面长期跑过，Cloudflare 会阻止命令行直接抓取。
+- 04：用假 DSH 档案验证列表、dry-run、删除、恢复和单文件 CMD；不碰真实 profile。
 
 ## 评审与修复
 

@@ -1,0 +1,6 @@
+dist/
+tests/profile/
+tests/tmp/
+tests/*.out.txt
+tests/*.err.txt
+*.log
